@@ -97,7 +97,125 @@ public final class Drafter {
             }
         }
     }
-    public static void ditherImageFloydAS(){
+    public static BufferedImage ditherImageFloydAS(BufferedImage image){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int quantCountR = 2, quantCountG = 2, quantCountB = 2;
+        int quantIntervalR = 255 / (quantCountR - 1);
+        int quantIntervalG = 255 / (quantCountG - 1);
+        int quantIntervalB = 255 / (quantCountB - 1);
+        byte[] curRowMistakesR = new byte[image.getWidth()];
+        byte[] curRowMistakesG = new byte[image.getWidth()];
+        byte[] curRowMistakesB = new byte[image.getWidth()];
+        byte[] nextRowMistakesR = new byte[image.getWidth()];
+        byte[] nextRowMistakesG = new byte[image.getWidth()];
+        byte[] nextRowMistakesB = new byte[image.getWidth()];
+        /*for(int y = 0; y < image.getHeight(); y++){
+            for(int x = 0; x < image.getHeight(); x++){
+                image.setRGB(x, y, 0xff000000);
+            }
+        }
+        return image;*/
+        for(int y = 0; y < image.getHeight(); y++){
+            byte mistakeR = 0;
+            byte mistakeG = 0;
+            byte mistakeB = 0;
+            for(int x = 0; x < image.getWidth(); x++){
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                int oldR = (oldPixel >> 16) & 0xff;
+                int oldG = (oldPixel >> 8) & 0xff;
+                int oldB = (oldPixel) & 0xff;
+                int newR = Math.round(oldR / (float)quantIntervalR) * quantIntervalR;
+                int newG = Math.round(oldG / (float)quantIntervalG) * quantIntervalG;
+                int newB = Math.round(oldB / (float)quantIntervalB) * quantIntervalB;
+                /*if (oldR / quantIntervalR == quantCountR)
+                    newR = newR - 1;]
+                if (oldG / quantIntervalG == quantCountG)
+                    newG = newG - 1;
+                if (oldB / quantIntervalB == quantCountB)
+                    newB = newB - 1;*/
+                int newPixel = (oldA << 24) & 0xFF000000 | (oldR << 16) & 0x00FF0000
+                             | (oldG << 8) & 0x0000FF00 | oldB & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+                mistakeR = (byte)(oldR - newR);
+                mistakeG = (byte)(oldG - newG);
+                mistakeB = (byte)(oldB - newB);
+                if(x != 0 && x != image.getWidth() - 1){
+                    nextRowMistakesR[x - 1] = (byte)(mistakeR * 3 / 16);
+                    nextRowMistakesG[x - 1] = (byte)(mistakeG * 3 / 16);
+                    nextRowMistakesB[x - 1] = (byte)(mistakeB * 3 / 16);
+                    nextRowMistakesR[x] = (byte)(mistakeR * 5 / 16);
+                    nextRowMistakesG[x] = (byte)(mistakeG * 5 / 16);
+                    nextRowMistakesB[x] = (byte)(mistakeB * 5 / 16);
+                    nextRowMistakesR[x + 1] = (byte)(mistakeR / 16);
+                    nextRowMistakesG[x + 1] = (byte)(mistakeG / 16);
+                    nextRowMistakesB[x + 1] = (byte)(mistakeB / 16);
+                }
+                mistakeR = (byte)(mistakeR * 7 / 16);
+                mistakeG = (byte)(mistakeG * 7 / 16);
+                mistakeB = (byte)(mistakeB * 7 / 16);
 
+            }
+
+            for(int i = 0; i < image.getWidth(); i ++){
+                curRowMistakesR[i] = nextRowMistakesR[i];
+                curRowMistakesG[i] = nextRowMistakesG[i];
+                curRowMistakesB[i] = nextRowMistakesB[i];
+                nextRowMistakesR[i] = 0;
+                nextRowMistakesG[i] = 0;
+                nextRowMistakesB[i] = 0;
+            }
+        }
+        return newImage;
+    }
+    public static BufferedImage maskPixels(BufferedImage image, double[][] mask){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int maskRadius = mask.length / 2;
+        for(int y = maskRadius; y < image.getHeight() - maskRadius; y++){
+            for(int x = maskRadius; x < image.getWidth() - maskRadius; x++){
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                double newR = 0, newG = 0, newB = 0;
+                for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
+                    for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
+                        int currentPixel = image.getRGB(x + horizontal, y + vertical);
+                        int currentR = (currentPixel >> 16) & 0xff;
+                        int currentG = (currentPixel >> 8) & 0xff;
+                        int currentB = (currentPixel) & 0xff;
+                        newR += (double)currentR * mask[horizontal + maskRadius][vertical + maskRadius];
+                        newG += (double)currentG * mask[horizontal + maskRadius][vertical + maskRadius];
+                        newB += (double)currentB * mask[horizontal + maskRadius][vertical + maskRadius];
+                    }
+                }
+                newR = newR < 0 ? 0 : newR;
+                newG = newG < 0 ? 0 : newG;
+                newB = newB < 0 ? 0 : newB;
+                newR = newR > 255 ? 255 : newR;
+                newG = newG > 255 ? 255 : newG;
+                newB = newB > 255 ? 255 : newB;
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                             | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
+    }
+    public static BufferedImage makeGrayShaded(BufferedImage image){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        for(int y = 0; y < image.getHeight() - 1; y++){
+            for(int x = 0; x < image.getWidth() - 1; x++){
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                int oldR = (oldPixel >> 16) & 0xff;
+                int oldG = (oldPixel >> 8) & 0xff;
+                int oldB = oldPixel & 0xff;
+                int newGrayShade = (int)(oldR * 0.30 + oldG * 0.59 + oldB * 0.11);
+
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newGrayShade << 16) & 0x00FF0000
+                        | ((char)newGrayShade << 8) & 0x0000FF00 | ((char)newGrayShade) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
     }
 }

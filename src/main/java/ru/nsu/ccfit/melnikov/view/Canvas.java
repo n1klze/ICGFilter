@@ -22,7 +22,7 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     public Canvas(Controller controller, Dimension dimension) {
         setPreferredSize(dimension);
         this.controller = controller;
-        image = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_RGB);
+        image = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_ARGB);
         g2d = image.createGraphics();
 
         addMouseListener(this);

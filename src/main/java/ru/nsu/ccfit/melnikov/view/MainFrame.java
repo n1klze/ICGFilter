@@ -197,8 +197,11 @@ public class MainFrame extends JFrame {
 
         JButton dither_AS = new JButton("DAS");
         dither_AS.addActionListener(e -> {
-
+            //controller.ditherImageFloydAS(canvas);
+            //controller.makeBlur(canvas);
+            controller.makeGrayShaded(canvas);
         });
+        toolBar.add(dither_AS);
         //dither_AS.setIcon("");
 
         toolBar.addSeparator();
