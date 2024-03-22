@@ -10,6 +10,8 @@ public class ColoredButton extends JButton {
         super("     ");
 
         setBackground(color);
+        setForeground(color);
+        setContentAreaFilled(true);
         setFocusPainted(false);
         addActionListener(e -> controller.setCurrentColor(color));
     }

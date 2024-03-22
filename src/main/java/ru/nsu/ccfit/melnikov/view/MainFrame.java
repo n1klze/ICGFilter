@@ -11,6 +11,8 @@ import ru.nsu.ccfit.melnikov.view.components.menu.AboutMenu;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -190,6 +192,14 @@ public class MainFrame extends JFrame {
         toolBarButtons.put(Tools.STAR, star);
         toolBar.add(star);
         toolButtonGroup.add(star);
+
+        toolBar.addSeparator();
+
+        JButton dither_AS = new JButton("DAS");
+        dither_AS.addActionListener(e -> {
+
+        });
+        //dither_AS.setIcon("");
 
         toolBar.addSeparator();
 

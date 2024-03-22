@@ -1,2 +1,2 @@
-rootProject.name = "ICGPaint"
+rootProject.name = "ICGFilter"
 

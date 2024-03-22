@@ -10,7 +10,8 @@ public enum Tools {
     FILL("/fill.png"),
     POLYGON("/polygon.png"),
     STAR("/star.png"),
-    PALETTE("/palette.png");
+    PALETTE("/palette.png"),
+    DITHER_AS("");
 
     private final String iconPath;
 

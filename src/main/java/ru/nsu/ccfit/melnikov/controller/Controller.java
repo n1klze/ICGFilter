@@ -120,4 +120,7 @@ public class Controller {
         for (int i = 0; i < 2 * numOfAngles; ++i)
             drawLine(image, vertex[i], vertex[(i + 1) % (2 * numOfAngles)]);
     }
+    public void ditherImageFloydAS(){
+        Drafter.ditherImageFloydAS();
+    }
 }

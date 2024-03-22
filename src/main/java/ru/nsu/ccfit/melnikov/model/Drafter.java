@@ -97,4 +97,7 @@ public final class Drafter {
             }
         }
     }
+    public static void ditherImageFloydAS(){
+
+    }
 }
