@@ -10,6 +10,7 @@ import ru.nsu.ccfit.melnikov.view.components.buttons.ToolButton;
 import ru.nsu.ccfit.melnikov.view.components.menu.AboutMenu;
 
 import javax.swing.*;
+import javax.tools.Tool;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,8 +23,8 @@ public class MainFrame extends JFrame {
     private static final Color[] MAIN_PALETTE_COLORS =
             {Color.BLACK, Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE};
     private final Controller controller = new Controller();
-    private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE);
-    private final JScrollPane scrollPane = new JScrollPane(canvas);
+    private final JScrollPane scrollPane = new JScrollPane();
+    private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE, scrollPane);
     private final FigureParametersDialog parametersDialog = new FigureParametersDialog(controller);
     private final ResizeDialog resizeDialog = new ResizeDialog();
     private final Map<Tools, ToolButton> toolBarButtons = new HashMap<>();
@@ -98,6 +99,9 @@ public class MainFrame extends JFrame {
         var view = new JMenu("View");
         var tools = new ButtonGroup();
 
+        var cursor = new JRadioButtonMenuItem(Tools.CURSOR.toString());
+        cursor.addActionListener(e -> controller.setCurrentTool(Tools.CURSOR, toolBarButtons, viewMenuToolButtons));
+        viewMenuToolButtons.put(Tools.CURSOR, cursor);
         var eraser = new JRadioButtonMenuItem(Tools.ERASER.toString());
         eraser.addActionListener(e -> {
             canvas.setDefaultBackground();
@@ -121,6 +125,7 @@ public class MainFrame extends JFrame {
         star.addActionListener(e -> controller.setCurrentTool(Tools.STAR, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.STAR, star);
 
+        tools.add(cursor);
         tools.add(eraser);
         tools.add(pen);
         tools.add(line);
@@ -128,6 +133,7 @@ public class MainFrame extends JFrame {
         tools.add(polygon);
         tools.add(star);
 
+        view.add(cursor);
         view.add(eraser);
         view.add(pen);
         view.add(line);
@@ -159,6 +165,13 @@ public class MainFrame extends JFrame {
         toolBar.setFloatable(false);
 
         var toolButtonGroup = new ButtonGroup();
+
+        var cursor = new ToolButton(controller, Tools.CURSOR, toolBarButtons, viewMenuToolButtons);
+        toolBarButtons.put(Tools.CURSOR, cursor);
+        toolBar.add(cursor);
+        toolButtonGroup.add(cursor);
+
+        toolBar.addSeparator();
 
         var eraser = new ToolButton(controller, Tools.ERASER, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.ERASER, eraser);
