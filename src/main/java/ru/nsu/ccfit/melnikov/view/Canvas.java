@@ -71,7 +71,6 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     }
 
     public void fitToScreen() {
-        System.out.println(controller.getCurrentInterpolationType());
         var factor = Math.min((double) spIm.getHorizontalScrollBar().getWidth() / image.getWidth(),
                 (double) spIm.getVerticalScrollBar().getHeight() / image.getHeight());
         var xform = AffineTransform.getScaleInstance(factor, factor);
