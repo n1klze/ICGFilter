@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum Tools {
+    CURSOR(""),
     ERASER("/eraser.png"),
     PEN("/pen.png"),
     LINE("/line.png"),

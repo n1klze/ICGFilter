@@ -5,14 +5,12 @@ import ru.nsu.ccfit.melnikov.model.Tools;
 import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.ResizeDialog;
 import ru.nsu.ccfit.melnikov.view.components.buttons.ColoredButton;
 import ru.nsu.ccfit.melnikov.view.components.buttons.IconButton;
-import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.FigureParametersDialog;
+import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.ParametersDialog;
 import ru.nsu.ccfit.melnikov.view.components.buttons.ToolButton;
 import ru.nsu.ccfit.melnikov.view.components.menu.AboutMenu;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +22,7 @@ public class MainFrame extends JFrame {
     private final Controller controller = new Controller();
     private final JScrollPane scrollPane = new JScrollPane();
     private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE, scrollPane);
-    private final FigureParametersDialog parametersDialog = new FigureParametersDialog(controller);
+    private final ParametersDialog parametersDialog = new ParametersDialog(controller);
     private final ResizeDialog resizeDialog = new ResizeDialog();
     private final Map<Tools, ToolButton> toolBarButtons = new HashMap<>();
     private final Map<Tools, JRadioButtonMenuItem> viewMenuToolButtons = new HashMap<>();
@@ -71,6 +69,7 @@ public class MainFrame extends JFrame {
                         controller.setNumOfAngles(parametersDialog.getNumOfAngles());
                         controller.setRadius(parametersDialog.getRadius());
                         controller.setRotation(parametersDialog.getRotation());
+                        controller.setCurrentInterpolationType(parametersDialog.getInterpolationTypeChooser());
                     }
                 });
             }
@@ -98,29 +97,39 @@ public class MainFrame extends JFrame {
         var view = new JMenu("View");
         var tools = new ButtonGroup();
 
+        var cursor = new JRadioButtonMenuItem(Tools.CURSOR.toString());
+        cursor.addActionListener(e -> controller.setCurrentTool(Tools.CURSOR, toolBarButtons, viewMenuToolButtons));
+        viewMenuToolButtons.put(Tools.CURSOR, cursor);
+
         var eraser = new JRadioButtonMenuItem(Tools.ERASER.toString());
         eraser.addActionListener(e -> {
             canvas.setDefaultBackground();
             controller.setCurrentTool(Tools.ERASER, toolBarButtons, viewMenuToolButtons);
         });
         viewMenuToolButtons.put(Tools.ERASER, eraser);
+
         var pen = new JRadioButtonMenuItem(Tools.PEN.toString());
         pen.setSelected(true);
         pen.addActionListener(e -> controller.setCurrentTool(Tools.PEN, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.PEN, pen);
+
         var line = new JRadioButtonMenuItem(Tools.LINE.toString());
         line.addActionListener(e -> controller.setCurrentTool(Tools.LINE, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.LINE, line);
+
         var fill = new JRadioButtonMenuItem(Tools.FILL.toString());
         fill.addActionListener(e -> controller.setCurrentTool(Tools.FILL, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.FILL, fill);
+
         var polygon = new JRadioButtonMenuItem(Tools.POLYGON.toString());
         polygon.addActionListener(e -> controller.setCurrentTool(Tools.POLYGON, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.POLYGON, polygon);
+
         var star = new JRadioButtonMenuItem(Tools.STAR.toString());
         star.addActionListener(e -> controller.setCurrentTool(Tools.STAR, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.STAR, star);
 
+        tools.add(cursor);
         tools.add(eraser);
         tools.add(pen);
         tools.add(line);
@@ -128,6 +137,7 @@ public class MainFrame extends JFrame {
         tools.add(polygon);
         tools.add(star);
 
+        view.add(cursor);
         view.add(eraser);
         view.add(pen);
         view.add(line);
@@ -160,6 +170,19 @@ public class MainFrame extends JFrame {
 
         var toolButtonGroup = new ButtonGroup();
 
+        var fit = new JToggleButton("FIT");
+        fit.addActionListener(e -> canvas.fitToScreen());
+        toolBar.add(fit);
+
+        toolBar.addSeparator();
+
+        var cursor = new ToolButton(controller, Tools.CURSOR, toolBarButtons, viewMenuToolButtons);
+        toolBarButtons.put(Tools.CURSOR, cursor);
+        toolBar.add(cursor);
+        toolButtonGroup.add(cursor);
+
+        toolBar.addSeparator();
+
         var eraser = new ToolButton(controller, Tools.ERASER, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.ERASER, eraser);
         eraser.addActionListener(e -> canvas.setDefaultBackground());
@@ -173,10 +196,12 @@ public class MainFrame extends JFrame {
         pen.setSelected(true);
         toolBar.add(pen);
         toolButtonGroup.add(pen);
+
         var line = new ToolButton(controller, Tools.LINE, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.LINE, line);
         toolBar.add(line);
         toolButtonGroup.add(line);
+
         var fill = new ToolButton(controller, Tools.FILL, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.FILL, fill);
         toolBar.add(fill);
@@ -188,6 +213,7 @@ public class MainFrame extends JFrame {
         toolBarButtons.put(Tools.POLYGON, polygon);
         toolBar.add(polygon);
         toolButtonGroup.add(polygon);
+
         var star = new ToolButton(controller, Tools.STAR, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.STAR, star);
         toolBar.add(star);

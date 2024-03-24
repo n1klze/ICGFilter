@@ -12,6 +12,7 @@ import ru.nsu.ccfit.melnikov.view.components.buttons.ToolButton;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class Controller {
     private Color currentColor = Color.BLACK;
     private Tools currentTool = Tools.PEN;
+    private int currentInterpolationType = AffineTransformOp.TYPE_BILINEAR;
     private int thickness = 1;
     private int numOfAngles = 5;
     private int radius = 70;
@@ -120,6 +122,7 @@ public class Controller {
         for (int i = 0; i < 2 * numOfAngles; ++i)
             drawLine(image, vertex[i], vertex[(i + 1) % (2 * numOfAngles)]);
     }
+  
     public void ditherImageFloydAS(Canvas canvas){
         BufferedImage newImage = Drafter.ditherImageFloydAS(canvas.getImage());
         canvas.setImage(newImage);
