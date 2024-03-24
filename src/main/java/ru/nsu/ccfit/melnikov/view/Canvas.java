@@ -7,6 +7,8 @@ import ru.nsu.ccfit.melnikov.model.Tools;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 public class Canvas extends JPanel implements MouseListener, MouseMotionListener {
@@ -68,6 +70,15 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
         repaint();
     }
 
+    public void fitToScreen() {
+        System.out.println(controller.getCurrentInterpolationType());
+        var factor = Math.min((double) spIm.getHorizontalScrollBar().getWidth() / image.getWidth(),
+                (double) spIm.getVerticalScrollBar().getHeight() / image.getHeight());
+        var xform = AffineTransform.getScaleInstance(factor, factor);
+        var fitOp = new AffineTransformOp(xform, controller.getCurrentInterpolationType());
+        setImage(fitOp.filter(image, null));
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -88,11 +99,10 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
                 g2d.fillOval(e.getX() - controller.getThickness() / 2, e.getY() - controller.getThickness() / 2,
                         controller.getThickness(), controller.getThickness());
             }
-            case LINE -> prevPoint = e.getPoint();
+            case LINE, CURSOR -> prevPoint = e.getPoint();
             case FILL -> controller.fill(image, e.getPoint());
             case POLYGON -> controller.drawPolygon(image, e.getPoint());
             case STAR -> controller.drawStar(image, e.getPoint());
-            case CURSOR -> prevPoint = e.getPoint();
         }
 
         repaint();
