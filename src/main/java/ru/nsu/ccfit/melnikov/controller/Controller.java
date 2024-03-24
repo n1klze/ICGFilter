@@ -47,7 +47,7 @@ public class Controller {
             try {
                 var newImage = ImageIO.read(loader.getSelectedFile());
                 if (newImage != null)
-                    canvas.setImage(newImage);
+                    canvas.loadImage(newImage);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
