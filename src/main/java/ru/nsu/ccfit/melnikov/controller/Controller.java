@@ -131,26 +131,12 @@ public class Controller {
         double[][] mask = {{0.0947416, 0.118318, 0.0947416},
                            {0.118318, 0.147761, 0.118318},
                            {0.0947416, 0.118318 , 0.0947416}};
-        double[][] maskRezko = {{0, -1, 0},
-                                {-1, 5, -1},
-                                {0, -1 , 0}};
-        double[][] maskBorder = {{0, 1, 0},
-                                 {-1, 0, 1},
-                                 {0, -1, 0}};
-        double[][] maskShnobelH = {{1, 0, -1},
-                                  {2, 0, -2},
-                                  {1, 0, -1}};
-        double[][] maskShnobelV = {{1, 2, 1},
-                                   {0, 0, -0},
-                                   {-1, -2, -1}};
-        double[][] maskRoberts = {{1, 0},
-                                  {0, -1}};
         double[][] mask2 = {{1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0},
                             {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
                             {6/256.0, 24/256.0, 36/256.0, 24/256.0, 6/256.0},
                             {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
                             {1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0}};
-        BufferedImage newImage = Drafter.maskPixels(canvas.getImage(), maskShnobelV);
+        BufferedImage newImage = Drafter.maskPixels(canvas.getImage(), mask2);
         canvas.setImage(newImage);
     }
     public void makeGrayShaded(Canvas canvas){
@@ -174,7 +160,7 @@ public class Controller {
         canvas.setImage(Drafter.getRotated(canvas.getImage(), angle));
     }
     public void makeEmbossing(Canvas canvas){
-        BufferedImage newImage = (Drafter.makeEmbossing(canvas.getImage()));
+        BufferedImage newImage = (Drafter.makeEmbossing(canvas.getImage(), 128));
         canvas.setImage(newImage);
     }
     public void makeSharpness(Canvas canvas){
