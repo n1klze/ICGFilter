@@ -22,8 +22,8 @@ public class MainFrame extends JFrame {
     private static final Color[] MAIN_PALETTE_COLORS =
             {Color.BLACK, Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE};
     private final Controller controller = new Controller();
-    private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE);
-    private final JScrollPane scrollPane = new JScrollPane(canvas);
+    private final JScrollPane scrollPane = new JScrollPane();
+    private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE, scrollPane);
     private final FigureParametersDialog parametersDialog = new FigureParametersDialog(controller);
     private final ResizeDialog resizeDialog = new ResizeDialog();
     private final Map<Tools, ToolButton> toolBarButtons = new HashMap<>();
@@ -40,9 +40,7 @@ public class MainFrame extends JFrame {
         setJMenuBar(createMenuBar());
         getContentPane().add(createToolBar(), BorderLayout.NORTH);
 
-        canvas.setScrollPane(scrollPane);
         getContentPane().add(scrollPane, BorderLayout.CENTER);
-        canvas.getScrollPane().setWheelScrollingEnabled(false);
     }
 
     private JMenuBar createMenuBar() {

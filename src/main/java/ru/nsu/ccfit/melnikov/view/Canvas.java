@@ -17,19 +17,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     private Point prevPoint = new Point(-1, -1);
     private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
 
-    public void setScrollPane(JScrollPane scrollPane) {
-        this.scrollPane = scrollPane;
-    }
+    private JScrollPane spIm;
 
-    public JScrollPane getScrollPane() {
-        return scrollPane;
-    }
-
-    private JScrollPane scrollPane;
-
-    public Canvas(Controller controller, Dimension dimension) {
+    public Canvas(Controller controller, Dimension dimension, JScrollPane scrollPane) {
         setPreferredSize(dimension);
         this.controller = controller;
+        this.spIm = scrollPane;
         image = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_ARGB);
         g2d = image.createGraphics();
 
