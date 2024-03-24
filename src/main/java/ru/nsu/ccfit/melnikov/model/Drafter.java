@@ -172,14 +172,24 @@ public final class Drafter {
     public static BufferedImage maskPixels(BufferedImage image, double[][] mask){
         BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         int maskRadius = mask.length / 2;
-        for(int y = maskRadius; y < image.getHeight() - maskRadius; y++){
-            for(int x = maskRadius; x < image.getWidth() - maskRadius; x++){
+        for(int y = 0; y < image.getHeight(); y++){
+            for(int x = 0; x < image.getWidth(); x++){
                 int oldPixel = image.getRGB(x, y);
                 int oldA = (oldPixel >> 24) & 0xff;
                 double newR = 0, newG = 0, newB = 0;
+                boolean border = false;
                 for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
                     for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
-                        int currentPixel = image.getRGB(x + horizontal, y + vertical);
+                        int currentX = x + horizontal;
+                        int currentY = y + vertical;
+                        if (currentX < 0 || currentY < 0 || currentX >= image.getWidth() || currentY >= image.getHeight()) {
+                            newImage.setRGB(x, y, oldPixel);
+                            horizontal = maskRadius + 1;
+                            vertical = maskRadius + 1;
+                            border = true;
+                            continue;
+                        }
+                        int currentPixel = image.getRGB(currentX, currentY);
                         int currentR = (currentPixel >> 16) & 0xff;
                         int currentG = (currentPixel >> 8) & 0xff;
                         int currentB = (currentPixel) & 0xff;
@@ -188,6 +198,8 @@ public final class Drafter {
                         newB += (double)currentB * mask[horizontal + maskRadius][vertical + maskRadius];
                     }
                 }
+                if(border)
+                    continue;
                 newR = newR < 0 ? 0 : newR;
                 newG = newG < 0 ? 0 : newG;
                 newB = newB < 0 ? 0 : newB;
@@ -209,7 +221,11 @@ public final class Drafter {
         double newR = 0, newG = 0, newB = 0;
         for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
             for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
-                int currentPixel = image.getRGB(x + horizontal, y + vertical);
+                int currentX = x + horizontal;
+                int currentY = y + vertical;
+                if (currentX < 0 || currentY < 0 || currentX >= image.getWidth() || currentY >= image.getHeight())
+                    continue;
+                int currentPixel = image.getRGB(currentX, currentY);
                 int currentR = (currentPixel >> 16) & 0xff;
                 int currentG = (currentPixel >> 8) & 0xff;
                 int currentB = (currentPixel) & 0xff;
@@ -231,8 +247,8 @@ public final class Drafter {
 
     public static BufferedImage makeGrayShaded(BufferedImage image){
         BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        for(int y = 0; y < image.getHeight() - 1; y++){
-            for(int x = 0; x < image.getWidth() - 1; x++){
+        for(int y = 0; y < image.getHeight(); y++){
+            for(int x = 0; x < image.getWidth(); x++){
                 int oldPixel = image.getRGB(x, y);
                 int oldA = (oldPixel >> 24) & 0xff;
                 int oldR = (oldPixel >> 16) & 0xff;
@@ -254,13 +270,23 @@ public final class Drafter {
         int[] neighboursR = new int[numOfNeighbours];
         int[] neighboursG = new int[numOfNeighbours];
         int[] neighboursB = new int[numOfNeighbours];
-        for(int y = maskRadius; y < image.getHeight() - maskRadius; y++){
-            for(int x = maskRadius; x < image.getWidth() - maskRadius; x++){
+        for(int y = 0; y < image.getHeight(); y++){
+            for(int x = 0; x < image.getWidth(); x++){
                 int oldPixel = image.getRGB(x, y);
                 int oldA = (oldPixel >> 24) & 0xff;
                 double newR = 0, newG = 0, newB = 0;
+                boolean border = false;
                 for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
                     for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
+                        int currentX = x + horizontal;
+                        int currentY = y + vertical;
+                        if (currentX < 0 || currentY < 0 || currentX >= image.getWidth() || currentY >= image.getHeight()) {
+                            newImage.setRGB(x, y, oldPixel);
+                            horizontal = maskRadius + 1;
+                            vertical = maskRadius + 1;
+                            border = true;
+                            continue;
+                        }
                         int currentPixel = image.getRGB(x + horizontal, y + vertical);
                         int currentR = (currentPixel >> 16) & 0xff;
                         int currentG = (currentPixel >> 8) & 0xff;
@@ -271,6 +297,8 @@ public final class Drafter {
                         neighboursB[neighbourIndex] = currentB;
                     }
                 }
+                if(border)
+                    continue;
                 Arrays.sort(neighboursR);
                 Arrays.sort(neighboursG);
                 Arrays.sort(neighboursB);
@@ -372,10 +400,8 @@ public final class Drafter {
         g2d.setColor(Color.WHITE);
         g2d.fillRect(0, 0, newW, newH);
 
-        for(int x = 0; x < newW; x++)
-        {
-            for(int y = 0; y < newH; y++)
-            {
+        for(int x = 0; x < newW; x++) {
+            for(int y = 0; y < newH; y++) {
                 int newX = (int) ((x - newW/2)*cos - (y - newH/2)*sin) + image.getWidth() / 2;
                 int newY = (int) ((x - newW/2)*sin + (y - newH/2)*cos) + image.getHeight() / 2;
 
@@ -392,42 +418,51 @@ public final class Drafter {
         return newImage;
     }
 
-    private static Dimension calculateRotatedSize(BufferedImage image, int angle){
-        int maxWidth = 0, maxHeight = 0, minWidth = 99999, minHeight = 99999;
-        int oldWidth = image.getWidth();
-        int oldHeight = image.getHeight();
-        double ang = Math.toRadians(angle);
-        double sin = Math.sin(ang);
-        double cos = Math.cos(ang);
+    private static float height(BufferedImage image, int width, int height, int x, int y) {
+        if (x >= width)  x %= width;
+        while (x < 0)    x += width;
+        if (y >= height) y %= height;
+        while (y < 0)    y += height;
 
-        int x0 = oldWidth / 2;
-        int y0 = oldHeight / 2;
-
-        for (int y = 0; y < oldHeight; y += oldHeight - 1) {
-            for (int x = 0; x < oldWidth; x += oldWidth - 1) {
-                double dx = x - x0;
-                double dy = y - y0;
-
-                int rotX = (int) (dx * cos - dy * sin + x0);
-                int rotY = (int) (dx * sin + dy * cos + y0);
-
-                if (rotX < minWidth)
-                    minWidth = rotX;
-                if (rotY < minHeight)
-                    minHeight = rotY;
-
-                if (rotX > maxWidth)
-                    maxWidth = rotX;
-                if (rotY > maxHeight)
-                    maxHeight = rotY;
-            }
-        }
-        Dimension rotatedSize = new Dimension(maxWidth - minWidth, maxHeight - minHeight);
-        return rotatedSize;
+        return (image.getRGB(x, y)) / 255.0f;
     }
+
+    private static int textureCoordinateToRgb(float value)
+    {
+        return (int)((value + 1.0) * (255.0 / 2.0));
+    }
+
+    private static int calculateNormal(BufferedImage image, int width, int height, int x, int z) {
+        float strength = 8.0f;
+
+        float tl = height(image, width, height, x-1, z-1);
+        float  l = height(image, width, height, x-1, z);
+        float bl = height(image, width, height, x-1, z+1);
+        float  t = height(image, width, height, x, z-1);
+        float  b = height(image, width, height, x, z+1);
+        float tr = height(image, width, height, x+1, z-1);
+        float  r = height(image, width, height, x+1, z);
+        float br = height(image, width, height, x+1, z+1);
+
+        float dX = (tr + 2.0f * r + br) - (tl + 2.0f * l + bl);
+        float dY = (bl + 2.0f * b + br) - (tl + 2.0f * t + tr);
+        float dZ = 1.0f / strength;
+        float norm = (float)Math.sqrt(dX * dX + dY * dY + dZ * dZ);
+        dX /= norm;
+        dY /= norm;
+        dZ /= norm;
+        int normal = 0xFF000000 | ((char)textureCoordinateToRgb(dX) << 16) & 0x00FF0000
+                | ((char)textureCoordinateToRgb(dY) << 8) & 0x0000FF00 | ((char)textureCoordinateToRgb(dZ)) & 0x000000FF;
+        //n = glm::normalize(n);
+
+        return normal;
+    }
+
     public static BufferedImage makeNormalMap(BufferedImage image) {
         int width = image.getWidth();
         int height = image.getHeight();
+        //BufferedImage heightMap = Drafter.makeEmbossing(image, 0);
+        BufferedImage heightMap = Drafter.makeGrayShaded(image);
         BufferedImage normalMap = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         double[][] maskShnobelH = {{1, 0, -1},
                 {2, 0, -2},
@@ -435,29 +470,21 @@ public final class Drafter {
         double[][] maskShnobelV = {{1, 2, 1},
                 {0, 0, -0},
                 {-1, -2, -1}};
-        double heightScale = 1.0/16.0;
         for (int x = 1; x < width - 1; x++) {
             for (int y = 1; y < height - 1; y++) {
-                int du = maskPixel(image, x, y, maskShnobelH);
-                int dv = maskPixel(image, x, y, maskShnobelV);
-                double norm = Math.sqrt(du * du + dv * dv + heightScale * heightScale);
-                int newA = 0xff;
-                int newR = (int)((du / norm) * 255);
-                int newG = (int)((dv / norm) * 255);
-                int newB = (int)((heightScale / norm) * 255);
-                int newPixel = (newA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
-                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                int normal = calculateNormal(image, width, height, x, y);
+                int newPixel = normal;
                 normalMap.setRGB(x, y, newPixel);
             }
         }
 
         return normalMap;
     }
-    public static BufferedImage makeEmbossing(BufferedImage image){
+    public static BufferedImage makeEmbossing(BufferedImage image, int offset){
         double[][] maskBorder = {{0, 1, 0},
                 {-1, 0, 1},
                 {0, -1, 0}};
-        return offsetImage(maskPixels(Drafter.makeGrayShaded(image), maskBorder), 0);
+        return offsetImage(maskPixels(Drafter.makeGrayShaded(image), maskBorder), offset);
     }
     public static BufferedImage makeSharpness(BufferedImage image){
         double[][] maskRezko = {{0, -1, 0},
