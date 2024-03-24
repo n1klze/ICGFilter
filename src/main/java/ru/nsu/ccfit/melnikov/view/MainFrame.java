@@ -170,7 +170,7 @@ public class MainFrame extends JFrame {
 
         var toolButtonGroup = new ButtonGroup();
 
-        var fit = new JToggleButton("FIT");
+        var fit = new JButton("FIT");
         fit.addActionListener(e -> canvas.fitToScreen());
         toolBar.add(fit);
 

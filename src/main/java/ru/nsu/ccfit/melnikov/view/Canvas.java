@@ -26,8 +26,6 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
         this.spIm = scrollPane;
         image = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_ARGB);
         g2d = image.createGraphics();
-
-        spIm = scrollPane;
         spIm.setWheelScrollingEnabled(false);
         spIm.setDoubleBuffered(true);
         spIm.setViewportView(this);
