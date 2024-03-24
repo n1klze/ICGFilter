@@ -165,8 +165,36 @@ public class Controller {
         BufferedImage newImage = Drafter.makeZoom(canvas.getImage(), 2);
         canvas.setImage(newImage);
     }
+    public void makeNormalMap(Canvas canvas){
+        BufferedImage newImage = Drafter.makeNormalMap(canvas.getImage());
+        canvas.setImage(newImage);
+    }
     public void makeRotation(Canvas canvas){
         int angle = 45;
         canvas.setImage(Drafter.getRotated(canvas.getImage(), angle));
+    }
+    public void makeEmbossing(Canvas canvas){
+        BufferedImage newImage = (Drafter.makeEmbossing(canvas.getImage()));
+        canvas.setImage(newImage);
+    }
+    public void makeSharpness(Canvas canvas){
+        BufferedImage newImage = (Drafter.makeSharpness(canvas.getImage()));
+        canvas.setImage(newImage);
+    }
+    public void makeGamma(Canvas canvas){
+        BufferedImage newImage = (Drafter.makeGamma(canvas.getImage(),  0.5));
+        canvas.setImage(newImage);
+    }
+    public void makeInverse(Canvas canvas){
+        BufferedImage newImage = (Drafter.makeInverse(canvas.getImage()));
+        canvas.setImage(newImage);
+    }
+    public void makeSobel(Canvas canvas){
+        BufferedImage newImage = (Drafter.makeSobel(canvas.getImage(), 70));
+        canvas.setImage(newImage);
+    }
+    public void makeRoberts(Canvas canvas){
+        BufferedImage newImage = (Drafter.makeRoberts(canvas.getImage(), 50));
+        canvas.setImage(newImage);
     }
 }

@@ -251,6 +251,41 @@ public class MainFrame extends JFrame {
             controller.makeZoom(canvas);
         });
         toolBar.add(zoomButton);
+        JButton normalMapButton = new JButton("H");
+        normalMapButton.addActionListener(e -> {
+            controller.makeNormalMap(canvas);
+        });
+        toolBar.add(normalMapButton);
+        JButton embossingButton = new JButton("E");
+        embossingButton.addActionListener(e -> {
+            controller.makeEmbossing(canvas);
+        });
+        toolBar.add(embossingButton);
+        JButton sharpnessButton = new JButton("S");
+        sharpnessButton.addActionListener(e -> {
+            controller.makeSharpness(canvas);
+        });
+        toolBar.add(sharpnessButton);
+        JButton sobelButton = new JButton("So");
+        sobelButton.addActionListener(e -> {
+            controller.makeSobel(canvas);
+        });
+        toolBar.add(sobelButton);
+        JButton robertsButton = new JButton("Ro");
+        robertsButton.addActionListener(e -> {
+            controller.makeRoberts(canvas);
+        });
+        toolBar.add(robertsButton);
+        JButton gammaButton = new JButton("G");
+        gammaButton.addActionListener(e -> {
+            controller.makeGamma(canvas);
+        });
+        toolBar.add(gammaButton);
+        JButton inverseButton = new JButton("I");
+        inverseButton.addActionListener(e -> {
+            controller.makeInverse(canvas);
+        });
+        toolBar.add(inverseButton);
 
         toolBar.addSeparator();
 

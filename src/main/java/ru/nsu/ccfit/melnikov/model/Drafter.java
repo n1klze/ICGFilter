@@ -201,6 +201,34 @@ public final class Drafter {
         }
         return newImage;
     }
+
+    public static int maskPixel(BufferedImage image, int x, int y, double[][] mask){
+        int maskRadius = mask.length / 2;
+        int oldPixel = image.getRGB(x, y);
+        int oldA = (oldPixel >> 24) & 0xff;
+        double newR = 0, newG = 0, newB = 0;
+        for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
+            for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
+                int currentPixel = image.getRGB(x + horizontal, y + vertical);
+                int currentR = (currentPixel >> 16) & 0xff;
+                int currentG = (currentPixel >> 8) & 0xff;
+                int currentB = (currentPixel) & 0xff;
+                newR += (double)currentR * mask[horizontal + maskRadius][vertical + maskRadius];
+                newG += (double)currentG * mask[horizontal + maskRadius][vertical + maskRadius];
+                newB += (double)currentB * mask[horizontal + maskRadius][vertical + maskRadius];
+            }
+        }
+        newR = newR < 0 ? 0 : newR;
+        newG = newG < 0 ? 0 : newG;
+        newB = newB < 0 ? 0 : newB;
+        newR = newR > 255 ? 255 : newR;
+        newG = newG > 255 ? 255 : newG;
+        newB = newB > 255 ? 255 : newB;
+        int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+        return newPixel;
+    }
+
     public static BufferedImage makeGrayShaded(BufferedImage image){
         BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         for(int y = 0; y < image.getHeight() - 1; y++){
@@ -261,7 +289,7 @@ public final class Drafter {
         int height = image.getHeight();
         BufferedImage zoomed = new BufferedImage(width * times, height * times, BufferedImage.TYPE_INT_RGB);
         int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
-
+        int maxZoomSize = 40000;
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
                 Color first = new Color(pixels[y * width + x]);
@@ -317,17 +345,17 @@ public final class Drafter {
             }
         }
 
-        int startX = width * times / 2 - 40000 / 2;
-        int startY = height * times / 2 - 40000 / 2;
+        int startX = width * times / 2 - maxZoomSize / 2;
+        int startY = height * times / 2 - maxZoomSize / 2;
 
-        if (40000 > width * times && 40000 > height * times) {
+        if (maxZoomSize > width * times && maxZoomSize > height * times) {
             return zoomed;
-        } else if (40000 > width * times) {
-            return zoomed.getSubimage(0, startY, width * times, 40000);
-        } else if (40000 > height * times) {
-            return zoomed.getSubimage(startX, 0, 40000, height * times);
+        } else if (maxZoomSize > width * times) {
+            return zoomed.getSubimage(0, startY, width * times, maxZoomSize);
+        } else if (maxZoomSize > height * times) {
+            return zoomed.getSubimage(startX, 0, maxZoomSize, height * times);
         } else {
-            return zoomed.getSubimage(startX, startY, 40000, 40000);
+            return zoomed.getSubimage(startX, startY, maxZoomSize, maxZoomSize);
         }
     }
     public static BufferedImage getRotated(BufferedImage image, int degree){
@@ -363,85 +391,7 @@ public final class Drafter {
 
         return newImage;
     }
-    public static BufferedImage getRotated2(BufferedImage image, int angle){
-        double angleSin = Math.sin(Math.toRadians(angle));
-        double angleCos = Math.cos(Math.toRadians(angle));
-        double[][] rotationMatrix = {{angleCos, (-1) * angleSin},
-                                     {angleSin, angleCos}};
-        int width = image.getWidth();
-        int height = image.getHeight();
 
-        int newWidth = width;
-        int newHeight = height;
-        if (angle % 180 != 0) {
-            newWidth = (int) (Math.abs(width * angleCos) + Math.abs(height * angleSin));
-            newHeight = (int) (Math.abs(width * angleSin) + Math.abs(height * angleCos));
-        }
-
-        BufferedImage rotatedImage = new BufferedImage(newWidth, newHeight, image.getType());
-        rotatedImage.getGraphics().fillRect(0, 0, newWidth, newHeight);
-
-        int centerX = newWidth / 2;
-        int centerY = newHeight / 2;
-
-        int originalCenterX = width / 2;
-        int originalCenterY = height / 2;
-        int[] rotatedCenter = transformCoordinates(rotationMatrix, originalCenterX, originalCenterY);
-        int rotatedCenterX = rotatedCenter[0];
-        int rotatedCenterY = rotatedCenter[1];
-
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
-                int[] rotatedCoordinates = transformCoordinates(rotationMatrix, x, y);
-                int rotatedX = rotatedCoordinates[0] + centerX - rotatedCenterX;
-                int rotatedY = rotatedCoordinates[1] + centerY - rotatedCenterY;
-
-                if (rotatedX >= 0 && rotatedX < rotatedImage.getWidth() && rotatedY >= 0 && rotatedY < rotatedImage.getHeight()) {
-                    int pixelColor = image.getRGB(x, y);
-                    rotatedImage.setRGB(rotatedX, rotatedY, pixelColor);
-                }
-            }
-        }
-        return rotatedImage;
-    }
-    private static int[] transformCoordinates(double[][] rotationMatrix, int x, int y) {
-        int rotatedX = (int) Math.round(rotationMatrix[0][0] * x + rotationMatrix[0][1] * y);
-        int rotatedY = (int) Math.round(rotationMatrix[1][0] * x + rotationMatrix[1][1] * y);
-        return new int[]{rotatedX, rotatedY};
-    }
-    public static BufferedImage getRotated1(BufferedImage image, int angle) {
-        int oldWidth = image.getWidth();
-        int oldHeight = image.getHeight();
-        Dimension rotatedSize = calculateRotatedSize(image, angle);
-        int newWidth = rotatedSize.width;
-        int newHeight = rotatedSize.height;
-        int widthExtension = (newWidth - oldWidth) / 2;
-        int heightExtension = (newHeight - oldHeight) / 2;
-        BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
-        //rotated.setRGB(0, 0, newWidth, newHeight, null, 0, newWidth);
-        int[] pixels = image.getRGB(0, 0, oldWidth, oldHeight, null, 0, oldWidth);
-
-        double ang = Math.toRadians(angle);
-        double sin = Math.sin(ang);
-        double cos = Math.cos(ang);
-
-        int x0 = oldWidth / 2;
-        int y0 = oldHeight / 2;
-
-        for (int y = 0; y < oldHeight; ++y) {
-            for (int x = 0; x < oldWidth; ++x) {
-                double dx = x - x0;
-                double dy = y - y0;
-
-                int rotX = (int) (dx * cos - dy * sin + x0);
-                int rotY = (int) (dx * sin + dy * cos + y0);
-
-                rotated.setRGB(widthExtension + rotX, heightExtension + rotY, pixels[y * oldWidth + x]);
-            }
-        }
-
-        return rotated;
-    }
     private static Dimension calculateRotatedSize(BufferedImage image, int angle){
         int maxWidth = 0, maxHeight = 0, minWidth = 99999, minHeight = 99999;
         int oldWidth = image.getWidth();
@@ -474,5 +424,148 @@ public final class Drafter {
         }
         Dimension rotatedSize = new Dimension(maxWidth - minWidth, maxHeight - minHeight);
         return rotatedSize;
+    }
+    public static BufferedImage makeNormalMap(BufferedImage image) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage normalMap = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        double[][] maskShnobelH = {{1, 0, -1},
+                {2, 0, -2},
+                {1, 0, -1}};
+        double[][] maskShnobelV = {{1, 2, 1},
+                {0, 0, -0},
+                {-1, -2, -1}};
+        double heightScale = 1.0/16.0;
+        for (int x = 1; x < width - 1; x++) {
+            for (int y = 1; y < height - 1; y++) {
+                int du = maskPixel(image, x, y, maskShnobelH);
+                int dv = maskPixel(image, x, y, maskShnobelV);
+                double norm = Math.sqrt(du * du + dv * dv + heightScale * heightScale);
+                int newA = 0xff;
+                int newR = (int)((du / norm) * 255);
+                int newG = (int)((dv / norm) * 255);
+                int newB = (int)((heightScale / norm) * 255);
+                int newPixel = (newA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                normalMap.setRGB(x, y, newPixel);
+            }
+        }
+
+        return normalMap;
+    }
+    public static BufferedImage makeEmbossing(BufferedImage image){
+        double[][] maskBorder = {{0, 1, 0},
+                {-1, 0, 1},
+                {0, -1, 0}};
+        return offsetImage(maskPixels(Drafter.makeGrayShaded(image), maskBorder), 0);
+    }
+    public static BufferedImage makeSharpness(BufferedImage image){
+        double[][] maskRezko = {{0, -1, 0},
+                {-1, 5, -1},
+                {0, -1 , 0}};
+        return maskPixels(image, maskRezko);
+    }
+    public static BufferedImage makeSobel(BufferedImage image, int threshold){
+        double[][] maskShnobelH = {{1, 0, -1},
+                {2, 0, -2},
+                {1, 0, -1}};
+        return binarizePixels(maskPixels(Drafter.makeGrayShaded(image), maskShnobelH), threshold);
+    }
+    public static BufferedImage makeRoberts(BufferedImage image, int threshold){
+        double[][] maskRoberts = {{1, 0, 0},
+                {0, 0, 0},
+                {0, 0, -1}};
+        return binarizePixels(maskPixels(Drafter.makeGrayShaded(image), maskRoberts), threshold);
+    }
+    public static BufferedImage makeInverse(BufferedImage image){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        int width = image.getWidth();
+        int height = image.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                int oldR = (oldPixel >> 16) & 0xff;
+                int oldG = (oldPixel >> 8) & 0xff;
+                int oldB = oldPixel & 0xff;
+                int newR = 255 - oldR;
+                int newG = 255 - oldG;
+                int newB = 255 - oldB;
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
+    }
+    public static BufferedImage makeGamma(BufferedImage image, double gamma){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        int width = image.getWidth();
+        int height = image.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                int oldR = (oldPixel >> 16) & 0xff;
+                int oldG = (oldPixel >> 8) & 0xff;
+                int oldB = oldPixel & 0xff;
+                int newR = (int)((Math.pow(oldR / 255.0, gamma)) * 255);
+                int newG = (int)((Math.pow(oldG / 255.0, gamma)) * 255);
+                int newB = (int)((Math.pow(oldB / 255.0, gamma)) * 255);
+
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
+    }
+    private static BufferedImage binarizePixels(BufferedImage image, int threshold){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        int width = image.getWidth();
+        int height = image.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                int oldR = (oldPixel >> 16) & 0xff;
+                int oldG = (oldPixel >> 8) & 0xff;
+                int oldB = oldPixel & 0xff;
+                int newR = oldR > threshold ? 255 : 0;
+                int newG = oldG > threshold ? 255 : 0;
+                int newB = oldB > threshold ? 255 : 0;
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
+    }
+    private static BufferedImage offsetImage(BufferedImage image, int offset){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        int width = image.getWidth();
+        int height = image.getHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                int oldR = (oldPixel >> 16) & 0xff;
+                int oldG = (oldPixel >> 8) & 0xff;
+                int oldB = oldPixel & 0xff;
+                int newR = oldR + offset;
+                int newG = oldG + offset;
+                int newB = oldB + offset;
+                newR = Math.max(newR, 0);
+                newG = Math.max(newG, 0);
+                newB = Math.max(newB, 0);
+                newR = Math.min(newR, 255);
+                newG = Math.min(newG, 255);
+                newB = Math.min(newB, 255);
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
     }
 }
