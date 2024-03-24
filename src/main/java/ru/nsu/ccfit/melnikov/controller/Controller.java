@@ -122,8 +122,51 @@ public class Controller {
         for (int i = 0; i < 2 * numOfAngles; ++i)
             drawLine(image, vertex[i], vertex[(i + 1) % (2 * numOfAngles)]);
     }
-
-    public void ditherImageFloydAS(){
-        Drafter.ditherImageFloydAS();
+  
+    public void ditherImageFloydAS(Canvas canvas){
+        BufferedImage newImage = Drafter.ditherImageFloydAS(canvas.getImage());
+        canvas.setImage(newImage);
+    }
+    public void makeBlur(Canvas canvas){
+        double[][] mask = {{0.0947416, 0.118318, 0.0947416},
+                           {0.118318, 0.147761, 0.118318},
+                           {0.0947416, 0.118318 , 0.0947416}};
+        double[][] maskRezko = {{0, -1, 0},
+                                {-1, 5, -1},
+                                {0, -1 , 0}};
+        double[][] maskBorder = {{0, 1, 0},
+                                 {-1, 0, 1},
+                                 {0, -1, 0}};
+        double[][] maskShnobelH = {{1, 0, -1},
+                                  {2, 0, -2},
+                                  {1, 0, -1}};
+        double[][] maskShnobelV = {{1, 2, 1},
+                                   {0, 0, -0},
+                                   {-1, -2, -1}};
+        double[][] maskRoberts = {{1, 0},
+                                  {0, -1}};
+        double[][] mask2 = {{1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0},
+                            {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
+                            {6/256.0, 24/256.0, 36/256.0, 24/256.0, 6/256.0},
+                            {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
+                            {1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0}};
+        BufferedImage newImage = Drafter.maskPixels(canvas.getImage(), maskShnobelV);
+        canvas.setImage(newImage);
+    }
+    public void makeGrayShaded(Canvas canvas){
+        BufferedImage newImage = Drafter.makeGrayShaded(canvas.getImage());
+        canvas.setImage(newImage);
+    }
+    public void makeWaterColored(Canvas canvas){
+        BufferedImage newImage = Drafter.makeWaterColored(canvas.getImage(), 2);
+        canvas.setImage(newImage);
+    }
+    public void makeZoom(Canvas canvas){
+        BufferedImage newImage = Drafter.makeZoom(canvas.getImage(), 2);
+        canvas.setImage(newImage);
+    }
+    public void makeRotation(Canvas canvas){
+        int angle = 45;
+        canvas.setImage(Drafter.getRotated(canvas.getImage(), angle));
     }
 }
