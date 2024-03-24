@@ -3,6 +3,7 @@ package ru.nsu.ccfit.melnikov.view.components.ParametersDialog;
 import lombok.Getter;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.image.AffineTransformOp;
 
 public class InterpolationTypeChooser extends JPanel {
@@ -29,6 +30,8 @@ public class InterpolationTypeChooser extends JPanel {
     }
 
     public InterpolationTypeChooser() {
+        setLayout(new GridLayout(1, 2));
+
         var label = new JLabel("Interpolation method:");
         label.setIcon(null);
         add(label);
