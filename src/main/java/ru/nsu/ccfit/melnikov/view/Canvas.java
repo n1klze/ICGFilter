@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 
 public class Canvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
     private final Controller controller;
+    private BufferedImage original;
     @Getter
     private BufferedImage image;
     private Graphics2D g2d;
@@ -20,10 +21,12 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
     private static final int INDENT = 4;
     private Point prevPoint = new Point(-1, -1);
     private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+
     public Canvas(Controller controller, Dimension dimension, JScrollPane scrollPane) {
         setPreferredSize(dimension);
         this.controller = controller;
         this.spIm = scrollPane;
+        original = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_ARGB);
         image = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_INT_ARGB);
         g2d = image.createGraphics();
         spIm.setWheelScrollingEnabled(false);
@@ -54,6 +57,15 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
         setPreferredSize(new Dimension(image.getWidth(), image.getHeight()));
         revalidate();
         spIm.paintAll(spIm.getGraphics());
+    }
+
+    public void loadImage(BufferedImage newImage) {
+        original = newImage;
+        setImage(newImage);
+    }
+
+    public void undo() {
+        setImage(original);
     }
 
     public void resizeCanvas(int newWidth, int newHeight) {

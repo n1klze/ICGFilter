@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.melnikov.view;
 
 import ru.nsu.ccfit.melnikov.controller.Controller;
+import ru.nsu.ccfit.melnikov.model.Filters;
 import ru.nsu.ccfit.melnikov.model.Tools;
 import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.ResizeDialog;
 import ru.nsu.ccfit.melnikov.view.components.buttons.ColoredButton;
@@ -45,6 +46,7 @@ public class MainFrame extends JFrame {
         var menuBar = new JMenuBar();
         menuBar.add(createFileMenu());
         menuBar.add(createViewMenu());
+        menuBar.add(createFiltersMenu());
         menuBar.add(createAboutMenu());
 
         return menuBar;
@@ -160,6 +162,64 @@ public class MainFrame extends JFrame {
         return view;
     }
 
+    private JMenu createFiltersMenu() {
+        var filters = new JMenu("Filters");
+
+        var rotation = new JMenuItem(Filters.ROTATION.toString());
+        rotation.addActionListener(e -> controller.makeRotation(canvas));
+        filters.add(rotation);
+
+        var floydDithering = new JMenuItem(Filters.FLOYD_STEINBERG_DITHERING.toString());
+        floydDithering.addActionListener(e -> controller.ditherImageFloydAS(canvas));
+        filters.add(floydDithering);
+
+        var blur = new JMenuItem(Filters.BLUR.toString());
+        blur.addActionListener(e -> controller.makeBlur(canvas));
+        filters.add(blur);
+
+        var grayscale = new JMenuItem(Filters.GRAYSCALE.toString());
+        grayscale.addActionListener(e -> controller.makeGrayShaded(canvas));
+        filters.add(grayscale);
+
+        var watercolor = new JMenuItem(Filters.WATERCOLOR.toString());
+        watercolor.addActionListener(e -> controller.makeWaterColored(canvas));
+        filters.add(watercolor);
+
+        var zoom = new JMenuItem(Filters.ZOOM.toString());
+        zoom.addActionListener(e -> controller.makeZoom(canvas));
+        filters.add(zoom);
+
+        var normalMap = new JMenuItem(Filters.NORMAL_MAP.toString());
+        normalMap.addActionListener(e -> controller.makeNormalMap(canvas));
+        filters.add(normalMap);
+
+        var embossing = new JMenuItem(Filters.EMBOSSING.toString());
+        embossing.addActionListener(e -> controller.makeEmbossing(canvas));
+        filters.add(embossing);
+
+        var sharpness = new JMenuItem(Filters.SHARPNESS.toString());
+        sharpness.addActionListener(e -> controller.makeSharpness(canvas));
+        filters.add(sharpness);
+
+        var sobel = new JMenuItem(Filters.SOBEL.toString());
+        sobel.addActionListener(e -> controller.makeSobel(canvas));
+        filters.add(sobel);
+
+        var roberts = new JMenuItem(Filters.ROBERTS.toString());
+        roberts.addActionListener(e -> controller.makeRoberts(canvas));
+        filters.add(roberts);
+
+        var gamma = new JMenuItem(Filters.GAMMA.toString());
+        gamma.addActionListener(e -> controller.makeGamma(canvas));
+        filters.add(gamma);
+
+        var inverse = new JMenuItem(Filters.INVERSE.toString());
+        inverse.addActionListener(e -> controller.makeInverse(canvas));
+        filters.add(inverse);
+
+        return filters;
+    }
+
     private JMenu createAboutMenu() {
         return new AboutMenu();
     }
@@ -169,6 +229,10 @@ public class MainFrame extends JFrame {
         toolBar.setFloatable(false);
 
         var toolButtonGroup = new ButtonGroup();
+
+        var undo = new JButton("UNDO");
+        undo.addActionListener(e -> canvas.undo());
+        toolBar.add(undo);
 
         var fit = new JButton("FIT");
         fit.addActionListener(e -> canvas.fitToScreen());
@@ -221,70 +285,56 @@ public class MainFrame extends JFrame {
 
         toolBar.addSeparator();
 
-        JButton rotateButton = new JButton("R");
-        rotateButton.addActionListener(e -> {
-            controller.makeRotation(canvas);
-        });
+        JButton rotateButton = new JButton(Filters.ROTATION.getPict());
+        rotateButton.addActionListener(e -> controller.makeRotation(canvas));
         toolBar.add(rotateButton);
-        JButton ditherButtonAS = new JButton("D");
-        ditherButtonAS.addActionListener(e -> {
-            controller.ditherImageFloydAS(canvas);
-        });
+
+        JButton ditherButtonAS = new JButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
+        ditherButtonAS.addActionListener(e -> controller.ditherImageFloydAS(canvas));
         toolBar.add(ditherButtonAS);
-        JButton blurButton = new JButton("B");
-        blurButton.addActionListener(e -> {
-            controller.makeBlur(canvas);
-        });
+
+        JButton blurButton = new JButton(Filters.BLUR.getPict());
+        blurButton.addActionListener(e -> controller.makeBlur(canvas));
         toolBar.add(blurButton);
-        JButton grayShadedButton = new JButton("GS");
-        grayShadedButton.addActionListener(e -> {
-            controller.makeGrayShaded(canvas);
-        });
+
+        JButton grayShadedButton = new JButton(Filters.GRAYSCALE.getPict());
+        grayShadedButton.addActionListener(e -> controller.makeGrayShaded(canvas));
         toolBar.add(grayShadedButton);
-        JButton waterColoredButton = new JButton("AQ");
-        waterColoredButton.addActionListener(e -> {
-            controller.makeWaterColored(canvas);
-        });
+
+        JButton waterColoredButton = new JButton(Filters.WATERCOLOR.getPict());
+        waterColoredButton.addActionListener(e -> controller.makeWaterColored(canvas));
         toolBar.add(waterColoredButton);
-        JButton zoomButton = new JButton("Z");
-        zoomButton.addActionListener(e -> {
-            controller.makeZoom(canvas);
-        });
+
+        JButton zoomButton = new JButton(Filters.ZOOM.getPict());
+        zoomButton.addActionListener(e -> controller.makeZoom(canvas));
         toolBar.add(zoomButton);
-        JButton normalMapButton = new JButton("H");
-        normalMapButton.addActionListener(e -> {
-            controller.makeNormalMap(canvas);
-        });
+
+        JButton normalMapButton = new JButton(Filters.NORMAL_MAP.getPict());
+        normalMapButton.addActionListener(e -> controller.makeNormalMap(canvas));
         toolBar.add(normalMapButton);
-        JButton embossingButton = new JButton("E");
-        embossingButton.addActionListener(e -> {
-            controller.makeEmbossing(canvas);
-        });
+
+        JButton embossingButton = new JButton(Filters.EMBOSSING.getPict());
+        embossingButton.addActionListener(e -> controller.makeEmbossing(canvas));
         toolBar.add(embossingButton);
-        JButton sharpnessButton = new JButton("S");
-        sharpnessButton.addActionListener(e -> {
-            controller.makeSharpness(canvas);
-        });
+
+        JButton sharpnessButton = new JButton(Filters.SHARPNESS.getPict());
+        sharpnessButton.addActionListener(e -> controller.makeSharpness(canvas));
         toolBar.add(sharpnessButton);
-        JButton sobelButton = new JButton("So");
-        sobelButton.addActionListener(e -> {
-            controller.makeSobel(canvas);
-        });
+
+        JButton sobelButton = new JButton(Filters.SOBEL.getPict());
+        sobelButton.addActionListener(e -> controller.makeSobel(canvas));
         toolBar.add(sobelButton);
-        JButton robertsButton = new JButton("Ro");
-        robertsButton.addActionListener(e -> {
-            controller.makeRoberts(canvas);
-        });
+
+        JButton robertsButton = new JButton(Filters.ROBERTS.getPict());
+        robertsButton.addActionListener(e -> controller.makeRoberts(canvas));
         toolBar.add(robertsButton);
-        JButton gammaButton = new JButton("G");
-        gammaButton.addActionListener(e -> {
-            controller.makeGamma(canvas);
-        });
+
+        JButton gammaButton = new JButton(Filters.GAMMA.getPict());
+        gammaButton.addActionListener(e -> controller.makeGamma(canvas));
         toolBar.add(gammaButton);
-        JButton inverseButton = new JButton("I");
-        inverseButton.addActionListener(e -> {
-            controller.makeInverse(canvas);
-        });
+
+        JButton inverseButton = new JButton(Filters.INVERSE.getPict());
+        inverseButton.addActionListener(e -> controller.makeInverse(canvas));
         toolBar.add(inverseButton);
 
         toolBar.addSeparator();
