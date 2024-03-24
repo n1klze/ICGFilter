@@ -6,18 +6,26 @@ import ru.nsu.ccfit.melnikov.model.Tools;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 
-public class Canvas extends JPanel implements MouseListener, MouseMotionListener {
+public class Canvas extends JPanel implements MouseListener, MouseMotionListener, MouseWheelListener {
     private final Controller controller;
     @Getter
     private BufferedImage image;
     private Graphics2D g2d;
     private Point prevPoint = new Point(-1, -1);
     private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+
+    public void setScrollPane(JScrollPane scrollPane) {
+        this.scrollPane = scrollPane;
+    }
+
+    public JScrollPane getScrollPane() {
+        return scrollPane;
+    }
+
+    private JScrollPane scrollPane;
 
     public Canvas(Controller controller, Dimension dimension) {
         setPreferredSize(dimension);
@@ -65,6 +73,10 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
 
     @Override
     public void mouseClicked(MouseEvent e) {
+
+    }
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e){
     }
 
     @Override
@@ -113,6 +125,29 @@ public class Canvas extends JPanel implements MouseListener, MouseMotionListener
             repaint();
         }
     }
+
+    /*@Override
+    public void mouseDragged(MouseEvent e)
+    {
+        // Move image with mouse
+
+        if (e.getModifiers() == InputEvent.BUTTON3_MASK)		// ( (e.getModifiers() & MouseEvent.BUTTON3_MASK) == 0)
+            return;
+
+        // move picture using scroll
+        Point scroll = spIm.getViewport().getViewPosition();
+        scroll.x += ( lastX - e.getX() );
+        scroll.y += ( lastY - e.getY() );
+
+        //spIm.getViewport().setViewPosition(scroll);
+        spIm.getHorizontalScrollBar().setValue(scroll.x);
+        spIm.getVerticalScrollBar().setValue(scroll.y);
+        spIm.repaint();
+
+        // We changed the position of the underlying picture, take it into account
+        //lastX = e.getX() + (lastX - e.getX());	// lastX = lastX
+        //lastY = e.getY() + (lastY - e.getY());	// lastY = lastY
+    }*/
 
     @Override
     public void mouseMoved(MouseEvent e) {

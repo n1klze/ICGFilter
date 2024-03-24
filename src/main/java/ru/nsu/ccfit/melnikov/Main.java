@@ -11,6 +11,11 @@ public class Main {
                 UIManager.setLookAndFeel(info.getClassName());
                 break;
             }*/
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
         var mainFrame = new MainFrame();
         mainFrame.display();
     }

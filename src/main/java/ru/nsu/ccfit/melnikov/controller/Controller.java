@@ -140,6 +140,8 @@ public class Controller {
         double[][] maskShnobelV = {{1, 2, 1},
                                    {0, 0, -0},
                                    {-1, -2, -1}};
+        double[][] maskRoberts = {{1, 0},
+                                  {0, -1}};
         double[][] mask2 = {{1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0},
                             {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
                             {6/256.0, 24/256.0, 36/256.0, 24/256.0, 6/256.0},
@@ -151,5 +153,17 @@ public class Controller {
     public void makeGrayShaded(Canvas canvas){
         BufferedImage newImage = Drafter.makeGrayShaded(canvas.getImage());
         canvas.setImage(newImage);
+    }
+    public void makeWaterColored(Canvas canvas){
+        BufferedImage newImage = Drafter.makeWaterColored(canvas.getImage(), 2);
+        canvas.setImage(newImage);
+    }
+    public void makeZoom(Canvas canvas){
+        BufferedImage newImage = Drafter.makeZoom(canvas.getImage(), 2);
+        canvas.setImage(newImage);
+    }
+    public void makeRotation(Canvas canvas){
+        int angle = 45;
+        canvas.setImage(Drafter.getRotated(canvas.getImage(), angle));
     }
 }

@@ -3,6 +3,7 @@ package ru.nsu.ccfit.melnikov.model;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 
 /**
@@ -217,5 +218,261 @@ public final class Drafter {
             }
         }
         return newImage;
+    }
+
+    public static BufferedImage makeWaterColored(BufferedImage image, int maskRadius){
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        int numOfNeighbours = (maskRadius * 2 + 1) * (maskRadius * 2 + 1);
+        int[] neighboursR = new int[numOfNeighbours];
+        int[] neighboursG = new int[numOfNeighbours];
+        int[] neighboursB = new int[numOfNeighbours];
+        for(int y = maskRadius; y < image.getHeight() - maskRadius; y++){
+            for(int x = maskRadius; x < image.getWidth() - maskRadius; x++){
+                int oldPixel = image.getRGB(x, y);
+                int oldA = (oldPixel >> 24) & 0xff;
+                double newR = 0, newG = 0, newB = 0;
+                for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
+                    for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
+                        int currentPixel = image.getRGB(x + horizontal, y + vertical);
+                        int currentR = (currentPixel >> 16) & 0xff;
+                        int currentG = (currentPixel >> 8) & 0xff;
+                        int currentB = (currentPixel) & 0xff;
+                        int neighbourIndex = (vertical + maskRadius) * (maskRadius * 2 + 1) + horizontal + maskRadius;
+                        neighboursR[neighbourIndex] = currentR;
+                        neighboursG[neighbourIndex] = currentG;
+                        neighboursB[neighbourIndex] = currentB;
+                    }
+                }
+                Arrays.sort(neighboursR);
+                Arrays.sort(neighboursG);
+                Arrays.sort(neighboursB);
+                newR = neighboursR[numOfNeighbours / 2];
+                newG = neighboursG[numOfNeighbours / 2];
+                newB = neighboursB[numOfNeighbours / 2];
+                int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
+                        | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+        return newImage;
+    }
+    public static BufferedImage makeZoom(BufferedImage image, int times){
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage zoomed = new BufferedImage(width * times, height * times, BufferedImage.TYPE_INT_RGB);
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                Color first = new Color(pixels[y * width + x]);
+                Color second;
+                if (x < width - 1) {
+                    second = new Color(pixels[y * width + x + 1]);
+                } else {
+                    second = first;
+                }
+
+                int red = first.getRed();
+                int green = first.getGreen();
+                int blue = first.getBlue();
+
+                int dR = (second.getRed() - first.getRed()) / times;
+                int dG = (second.getGreen() - first.getGreen()) / times;
+                int dB = (second.getBlue() - first.getBlue()) / times;
+
+                for (int k = 0; k < times; k++) {
+                    zoomed.setRGB(x * times + k, y * times, new Color(red, green, blue).getRGB());
+
+                    red += dR;
+                    green += dG;
+                    blue += dB;
+                }
+            }
+        }
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width * times; ++x) {
+                Color first = new Color(zoomed.getRGB(x, y * times));
+                Color second;
+                if (y < height - 1) {
+                    second = new Color(zoomed.getRGB(x, y * times + times));
+                } else {
+                    second = first;
+                }
+                int red = first.getRed();
+                int green = first.getGreen();
+                int blue = first.getBlue();
+
+                int dR = (second.getRed() - first.getRed()) / times;
+                int dG = (second.getGreen() - first.getGreen()) / times;
+                int dB = (second.getBlue() - first.getBlue()) / times;
+
+                for (int k = 0; k < times; k++) {
+                    zoomed.setRGB(x, y * times + k, new Color(red, green, blue).getRGB());
+
+                    red += dR;
+                    green += dG;
+                    blue += dB;
+                }
+            }
+        }
+
+        int startX = width * times / 2 - 40000 / 2;
+        int startY = height * times / 2 - 40000 / 2;
+
+        if (40000 > width * times && 40000 > height * times) {
+            return zoomed;
+        } else if (40000 > width * times) {
+            return zoomed.getSubimage(0, startY, width * times, 40000);
+        } else if (40000 > height * times) {
+            return zoomed.getSubimage(startX, 0, 40000, height * times);
+        } else {
+            return zoomed.getSubimage(startX, startY, 40000, 40000);
+        }
+    }
+    public static BufferedImage getRotated(BufferedImage image, int degree){
+        System.out.println(degree);
+        double angle = Math.toRadians(degree);
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+
+        int newH = (int) (image.getWidth()*Math.abs(sin) + image.getHeight()*Math.abs(cos));
+        int newW = (int) (image.getWidth()*Math.abs(cos) + image.getHeight()*Math.abs(sin));
+
+        BufferedImage newImage = new BufferedImage(newW, newH, image.getType());
+        Graphics2D g2d = newImage.createGraphics();
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, newW, newH);
+
+        for(int x = 0; x < newW; x++)
+        {
+            for(int y = 0; y < newH; y++)
+            {
+                int newX = (int) ((x - newW/2)*cos - (y - newH/2)*sin) + image.getWidth() / 2;
+                int newY = (int) ((x - newW/2)*sin + (y - newH/2)*cos) + image.getHeight() / 2;
+
+                int color = 0;
+                if(newX > 0 && newY > 0 && newX < image.getWidth() && newY < image.getHeight())
+                    color = image.getRGB(newX, newY);
+                else
+                    color = -1;
+
+                newImage.setRGB(x, y, color);
+            }
+        }
+
+        return newImage;
+    }
+    public static BufferedImage getRotated2(BufferedImage image, int angle){
+        double angleSin = Math.sin(Math.toRadians(angle));
+        double angleCos = Math.cos(Math.toRadians(angle));
+        double[][] rotationMatrix = {{angleCos, (-1) * angleSin},
+                                     {angleSin, angleCos}};
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        int newWidth = width;
+        int newHeight = height;
+        if (angle % 180 != 0) {
+            newWidth = (int) (Math.abs(width * angleCos) + Math.abs(height * angleSin));
+            newHeight = (int) (Math.abs(width * angleSin) + Math.abs(height * angleCos));
+        }
+
+        BufferedImage rotatedImage = new BufferedImage(newWidth, newHeight, image.getType());
+        rotatedImage.getGraphics().fillRect(0, 0, newWidth, newHeight);
+
+        int centerX = newWidth / 2;
+        int centerY = newHeight / 2;
+
+        int originalCenterX = width / 2;
+        int originalCenterY = height / 2;
+        int[] rotatedCenter = transformCoordinates(rotationMatrix, originalCenterX, originalCenterY);
+        int rotatedCenterX = rotatedCenter[0];
+        int rotatedCenterY = rotatedCenter[1];
+
+        for (int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                int[] rotatedCoordinates = transformCoordinates(rotationMatrix, x, y);
+                int rotatedX = rotatedCoordinates[0] + centerX - rotatedCenterX;
+                int rotatedY = rotatedCoordinates[1] + centerY - rotatedCenterY;
+
+                if (rotatedX >= 0 && rotatedX < rotatedImage.getWidth() && rotatedY >= 0 && rotatedY < rotatedImage.getHeight()) {
+                    int pixelColor = image.getRGB(x, y);
+                    rotatedImage.setRGB(rotatedX, rotatedY, pixelColor);
+                }
+            }
+        }
+        return rotatedImage;
+    }
+    private static int[] transformCoordinates(double[][] rotationMatrix, int x, int y) {
+        int rotatedX = (int) Math.round(rotationMatrix[0][0] * x + rotationMatrix[0][1] * y);
+        int rotatedY = (int) Math.round(rotationMatrix[1][0] * x + rotationMatrix[1][1] * y);
+        return new int[]{rotatedX, rotatedY};
+    }
+    public static BufferedImage getRotated1(BufferedImage image, int angle) {
+        int oldWidth = image.getWidth();
+        int oldHeight = image.getHeight();
+        Dimension rotatedSize = calculateRotatedSize(image, angle);
+        int newWidth = rotatedSize.width;
+        int newHeight = rotatedSize.height;
+        int widthExtension = (newWidth - oldWidth) / 2;
+        int heightExtension = (newHeight - oldHeight) / 2;
+        BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        //rotated.setRGB(0, 0, newWidth, newHeight, null, 0, newWidth);
+        int[] pixels = image.getRGB(0, 0, oldWidth, oldHeight, null, 0, oldWidth);
+
+        double ang = Math.toRadians(angle);
+        double sin = Math.sin(ang);
+        double cos = Math.cos(ang);
+
+        int x0 = oldWidth / 2;
+        int y0 = oldHeight / 2;
+
+        for (int y = 0; y < oldHeight; ++y) {
+            for (int x = 0; x < oldWidth; ++x) {
+                double dx = x - x0;
+                double dy = y - y0;
+
+                int rotX = (int) (dx * cos - dy * sin + x0);
+                int rotY = (int) (dx * sin + dy * cos + y0);
+
+                rotated.setRGB(widthExtension + rotX, heightExtension + rotY, pixels[y * oldWidth + x]);
+            }
+        }
+
+        return rotated;
+    }
+    private static Dimension calculateRotatedSize(BufferedImage image, int angle){
+        int maxWidth = 0, maxHeight = 0, minWidth = 99999, minHeight = 99999;
+        int oldWidth = image.getWidth();
+        int oldHeight = image.getHeight();
+        double ang = Math.toRadians(angle);
+        double sin = Math.sin(ang);
+        double cos = Math.cos(ang);
+
+        int x0 = oldWidth / 2;
+        int y0 = oldHeight / 2;
+
+        for (int y = 0; y < oldHeight; y += oldHeight - 1) {
+            for (int x = 0; x < oldWidth; x += oldWidth - 1) {
+                double dx = x - x0;
+                double dy = y - y0;
+
+                int rotX = (int) (dx * cos - dy * sin + x0);
+                int rotY = (int) (dx * sin + dy * cos + y0);
+
+                if (rotX < minWidth)
+                    minWidth = rotX;
+                if (rotY < minHeight)
+                    minHeight = rotY;
+
+                if (rotX > maxWidth)
+                    maxWidth = rotX;
+                if (rotY > maxHeight)
+                    maxHeight = rotY;
+            }
+        }
+        Dimension rotatedSize = new Dimension(maxWidth - minWidth, maxHeight - minHeight);
+        return rotatedSize;
     }
 }

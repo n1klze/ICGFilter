@@ -40,7 +40,9 @@ public class MainFrame extends JFrame {
         setJMenuBar(createMenuBar());
         getContentPane().add(createToolBar(), BorderLayout.NORTH);
 
+        canvas.setScrollPane(scrollPane);
         getContentPane().add(scrollPane, BorderLayout.CENTER);
+        canvas.getScrollPane().setWheelScrollingEnabled(false);
     }
 
     private JMenuBar createMenuBar() {
@@ -195,14 +197,36 @@ public class MainFrame extends JFrame {
 
         toolBar.addSeparator();
 
-        JButton dither_AS = new JButton("DAS");
-        dither_AS.addActionListener(e -> {
-            //controller.ditherImageFloydAS(canvas);
-            //controller.makeBlur(canvas);
+        JButton rotateButton = new JButton("R");
+        rotateButton.addActionListener(e -> {
+            controller.makeRotation(canvas);
+        });
+        toolBar.add(rotateButton);
+        JButton ditherButtonAS = new JButton("D");
+        ditherButtonAS.addActionListener(e -> {
+            controller.ditherImageFloydAS(canvas);
+        });
+        toolBar.add(ditherButtonAS);
+        JButton blurButton = new JButton("B");
+        blurButton.addActionListener(e -> {
+            controller.makeBlur(canvas);
+        });
+        toolBar.add(blurButton);
+        JButton grayShadedButton = new JButton("GS");
+        grayShadedButton.addActionListener(e -> {
             controller.makeGrayShaded(canvas);
         });
-        toolBar.add(dither_AS);
-        //dither_AS.setIcon("");
+        toolBar.add(grayShadedButton);
+        JButton waterColoredButton = new JButton("AQ");
+        waterColoredButton.addActionListener(e -> {
+            controller.makeWaterColored(canvas);
+        });
+        toolBar.add(waterColoredButton);
+        JButton zoomButton = new JButton("Z");
+        zoomButton.addActionListener(e -> {
+            controller.makeZoom(canvas);
+        });
+        toolBar.add(zoomButton);
 
         toolBar.addSeparator();
 
