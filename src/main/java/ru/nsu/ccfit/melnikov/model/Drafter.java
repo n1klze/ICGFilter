@@ -300,7 +300,7 @@ public final class Drafter {
         var dg = 255.0 / (greenValue - 1);
         var db = 255.0 / (blueValue - 1);
         var factor = 1.0 / Math.pow(n, 2);
-        int[] threshold = getErrors(n); //TODO: переделать
+        int[] threshold = generateThresholdMatrix(n);
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
@@ -330,6 +330,23 @@ public final class Drafter {
 
     private static int[] generateThresholdMatrix(int n) {
         int[] matrix = new int[n * n];
+
+        if (n == 1) {
+            matrix[0] = 0;
+            return matrix;
+        }
+
+        int len = n / 2;
+        int[] smaller = generateThresholdMatrix(len);
+
+        for (int y = 0; y < 2; ++y) {
+            for (int k = 0; k < len; ++k) {
+                for (int l = 0; l < len; ++l) {
+                    matrix[k * len * 2 + (len * y + l)] = 4 * smaller[k * len + l] + 2 * y;
+                    matrix[((len + k) * len) * 2 + (len * y + l)] = 4 * smaller[k * len + l] + 3 - 2 * y;
+                }
+            }
+        }
 
         return matrix;
     }
