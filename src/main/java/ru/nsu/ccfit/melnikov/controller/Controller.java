@@ -127,6 +127,10 @@ public class Controller {
         BufferedImage newImage = Drafter.ditherImageFloydAS(canvas.getImage(), quantsR, quantsG, quantsB);
         canvas.setImage(newImage);
     }
+    public void ditherImageFloydNM(Canvas canvas, int quantsR, int quantsG, int quantsB){
+        BufferedImage newImage = Drafter.ditherImageFloydNM(canvas.getImage(), quantsR, quantsG, quantsB);
+        canvas.setImage(newImage);
+    }
     public void ditherImageOrderedAS(Canvas canvas, int quantsR, int quantsG, int quantsB){
         int n = Math.max(Math.max(quantsR, quantsG), quantsB) * 2;
         BufferedImage newImage = Drafter.ditherImageOrderedAS(canvas.getImage(), quantsR, quantsG, quantsB, n);

@@ -293,47 +293,42 @@ public final class Drafter {
 
 
     public static BufferedImage ditherImageFloydNM(BufferedImage image, int quantCountR, int quantCountG, int quantCountB) {
-        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        int oldPixel, currPixel, newPixel, neighbourPixel;
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage newImage = new BufferedImage(width, height, image.getType());
+        newImage.createGraphics().drawImage(image, null, 0, 0);
+        int oldPixel, newPixel, neighbourPixel;
         int oldR, oldG, oldB;
-        int currR, currG, currB;
         int newR, newG, newB;
         int errR, errG, errB;
         int neighbourR, neighbourG, neighbourB;
-        int interval;
 
-        for (int y = 0; y < image.getHeight(); ++y) {
-            for (int x = 0; x < image.getWidth(); ++x) {
-                oldPixel = image.getRGB(x, y);
-                currPixel = newImage.getRGB(x, y);
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                oldPixel = newImage.getRGB(x, y);
+
                 oldR = (oldPixel >> 16) & 0xFF;
                 oldG = (oldPixel >> 8) & 0xFF;
                 oldB = oldPixel & 0xFF;
-                currR = (currPixel >> 16) & 0xFF;
-                currG = (currPixel >> 8) & 0xFF;
-                currB = currPixel & 0xFF;
 
-                interval = 256 / (quantCountR - 1);
-                newR = Math.min(Math.round((float) oldR / interval) * interval + currR, 255);
-                interval = 256 / (quantCountG - 1);
-                newG = Math.min(Math.round((float) oldG / interval) * interval + currG, 255);
-                interval = 256 / (quantCountB - 1);
-                newB = Math.min(Math.round((float) oldB / interval) * interval + currB, 255);
+                newR = Math.round(oldR * (quantCountR - 1) / 255f) * 255 / (quantCountR - 1);
+                newG = Math.round(oldG * (quantCountG - 1) / 255f) * 255 / (quantCountG - 1);
+                newB = Math.round(oldB * (quantCountB - 1) / 255f) * 255 / (quantCountB - 1);
 
                 newPixel = 255 << 24 | newR << 16 | newG << 8 | newB;
 
                 newImage.setRGB(x, y, newPixel);
 
-                errR = newR - oldR;
-                errG = newG - oldG;
-                errB = newB - oldB;
+                errR = oldR - newR;
+                errG = oldG - newG;
+                errB = oldB - newB;
 
                 if (x < newImage.getWidth() - 1) {
                     var factor = 7.0 / 16;
                     neighbourPixel = newImage.getRGB(x + 1, y);
-                    neighbourR = (neighbourPixel >> 16) & 0xFF + (int) (errR * factor);
-                    neighbourG = (neighbourPixel >> 8) & 0xFF + (int) (errG * factor);
-                    neighbourB = neighbourPixel & 0xFF + (int) (errB * factor);
+                    neighbourR = Math.max(0, Math.min(((neighbourPixel >> 16) & 0xFF) + (int) (errR * factor), 255));
+                    neighbourG = Math.max(0, Math.min(((neighbourPixel >> 8) & 0xFF) + (int) (errG * factor), 255));
+                    neighbourB = Math.max(0, Math.min((neighbourPixel & 0xFF) + (int) (errB * factor), 255));
 
                     neighbourPixel = 255 << 24 | neighbourR << 16 | neighbourG << 8 | neighbourB;
                     newImage.setRGB(x + 1, y, neighbourPixel);
@@ -341,9 +336,9 @@ public final class Drafter {
                 if (x < newImage.getWidth() - 1 && y < newImage.getHeight() - 1) {
                     var factor = 1.0 / 16;
                     neighbourPixel = newImage.getRGB(x + 1, y + 1);
-                    neighbourR = (neighbourPixel >> 16) & 0xFF + (int) (errR * factor);
-                    neighbourG = (neighbourPixel >> 8) & 0xFF + (int) (errG * factor);
-                    neighbourB = neighbourPixel & 0xFF + (int) (errB * factor);
+                    neighbourR = Math.max(0, Math.min(((neighbourPixel >> 16) & 0xFF) + (int) (errR * factor), 255));
+                    neighbourG = Math.max(0, Math.min(((neighbourPixel >> 8) & 0xFF) + (int) (errG * factor), 255));
+                    neighbourB = Math.max(0, Math.min((neighbourPixel & 0xFF) + (int) (errB * factor), 255));
 
                     neighbourPixel = 255 << 24 | neighbourR << 16 | neighbourG << 8 | neighbourB;
                     newImage.setRGB(x + 1, y + 1, neighbourPixel);
@@ -351,9 +346,9 @@ public final class Drafter {
                 if (y < newImage.getHeight() - 1) {
                     var factor = 5.0 / 16;
                     neighbourPixel = newImage.getRGB(x, y + 1);
-                    neighbourR = (neighbourPixel >> 16) & 0xFF + (int) (errR * factor);
-                    neighbourG = (neighbourPixel >> 8) & 0xFF + (int) (errG * factor);
-                    neighbourB = neighbourPixel & 0xFF + (int) (errB * factor);
+                    neighbourR = Math.max(0, Math.min(((neighbourPixel >> 16) & 0xFF) + (int) (errR * factor), 255));
+                    neighbourG = Math.max(0, Math.min(((neighbourPixel >> 8) & 0xFF) + (int) (errG * factor), 255));
+                    neighbourB = Math.max(0, Math.min((neighbourPixel & 0xFF) + (int) (errB * factor), 255));
 
                     neighbourPixel = 255 << 24 | neighbourR << 16 | neighbourG << 8 | neighbourB;
                     newImage.setRGB(x, y + 1, neighbourPixel);
@@ -361,15 +356,16 @@ public final class Drafter {
                 if (x > 0 && y < newImage.getHeight() - 1) {
                     var factor = 3.0 / 16;
                     neighbourPixel = newImage.getRGB(x - 1, y + 1);
-                    neighbourR = (neighbourPixel >> 16) & 0xFF + (int) (errR * factor);
-                    neighbourG = (neighbourPixel >> 8) & 0xFF + (int) (errG * factor);
-                    neighbourB = neighbourPixel & 0xFF + (int) (errB * factor);
+                    neighbourR = Math.max(0, Math.min(((neighbourPixel >> 16) & 0xFF) + (int) (errR * factor), 255));
+                    neighbourG = Math.max(0, Math.min(((neighbourPixel >> 8) & 0xFF) + (int) (errG * factor), 255));
+                    neighbourB = Math.max(0, Math.min((neighbourPixel & 0xFF) + (int) (errB * factor), 255));
 
                     neighbourPixel = 255 << 24 | neighbourR << 16 | neighbourG << 8 | neighbourB;
                     newImage.setRGB(x - 1, y + 1, neighbourPixel);
                 }
             }
         }
+
         return newImage;
     }
     public static BufferedImage maskPixels(BufferedImage image, double[][] mask){

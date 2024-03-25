@@ -189,7 +189,8 @@ public class MainFrame extends JFrame {
                     controller.ditherImageFloydAS(canvas, ditheringDialog.getQuantsCountChooserR(),
                             ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
                 else{
-
+                    controller.ditherImageFloydNM(canvas, ditheringDialog.getQuantsCountChooserR(),
+                            ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
                 }
             }
         });
@@ -346,7 +347,8 @@ public class MainFrame extends JFrame {
                     controller.ditherImageFloydAS(canvas, ditheringDialog.getQuantsCountChooserR(),
                             ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
                 else{
-
+                    controller.ditherImageFloydNM(canvas, ditheringDialog.getQuantsCountChooserR(),
+                            ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
                 }
             }
         });
