@@ -3,6 +3,7 @@ package ru.nsu.ccfit.melnikov.view;
 import ru.nsu.ccfit.melnikov.controller.Controller;
 import ru.nsu.ccfit.melnikov.model.Filters;
 import ru.nsu.ccfit.melnikov.model.Tools;
+import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.AngleDialog;
 import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.ResizeDialog;
 import ru.nsu.ccfit.melnikov.view.components.buttons.ColoredButton;
 import ru.nsu.ccfit.melnikov.view.components.buttons.IconButton;
@@ -25,6 +26,8 @@ public class MainFrame extends JFrame {
     private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE, scrollPane);
     private final ParametersDialog parametersDialog = new ParametersDialog(controller);
     private final ResizeDialog resizeDialog = new ResizeDialog();
+    private final AngleDialog rotationDialog = new AngleDialog();
+    private final AngleDialog twirlDialog = new AngleDialog();
     private final Map<Tools, ToolButton> toolBarButtons = new HashMap<>();
     private final Map<Tools, JRadioButtonMenuItem> viewMenuToolButtons = new HashMap<>();
 
@@ -166,7 +169,12 @@ public class MainFrame extends JFrame {
         var filters = new JMenu("Filters");
 
         var rotation = new JMenuItem(Filters.ROTATION.toString());
-        rotation.addActionListener(e -> controller.makeRotation(canvas));
+        rotation.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, rotationDialog,
+                    Filters.ROTATION.toString(), JOptionPane.OK_CANCEL_OPTION);
+            if (JOptionPane.OK_OPTION == confirm)
+                controller.makeRotation(canvas, rotationDialog.getAngle());
+        });
         filters.add(rotation);
 
         var floydDithering = new JMenuItem(Filters.FLOYD_STEINBERG_DITHERING.toString());
@@ -192,6 +200,15 @@ public class MainFrame extends JFrame {
         var normalMap = new JMenuItem(Filters.NORMAL_MAP.toString());
         normalMap.addActionListener(e -> controller.makeNormalMap(canvas));
         filters.add(normalMap);
+
+        var twirl = new JMenuItem(Filters.TWIRL.toString());
+        twirl.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, twirlDialog,
+                    Filters.TWIRL.toString(), JOptionPane.OK_CANCEL_OPTION);
+            if (JOptionPane.OK_OPTION == confirm)
+                controller.makeTwirl(canvas, rotationDialog.getAngle());
+        });
+        filters.add(twirl);
 
         var embossing = new JMenuItem(Filters.EMBOSSING.toString());
         embossing.addActionListener(e -> controller.makeEmbossing(canvas));
@@ -286,7 +303,12 @@ public class MainFrame extends JFrame {
         toolBar.addSeparator();
 
         JButton rotateButton = new JButton(Filters.ROTATION.getPict());
-        rotateButton.addActionListener(e -> controller.makeRotation(canvas));
+        rotateButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, rotationDialog,
+                    Filters.ROTATION.toString(), JOptionPane.OK_CANCEL_OPTION);
+            if (JOptionPane.OK_OPTION == confirm)
+                controller.makeRotation(canvas, rotationDialog.getAngle());
+        });
         toolBar.add(rotateButton);
 
         JButton ditherButtonAS = new JButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
@@ -312,6 +334,15 @@ public class MainFrame extends JFrame {
         JButton normalMapButton = new JButton(Filters.NORMAL_MAP.getPict());
         normalMapButton.addActionListener(e -> controller.makeNormalMap(canvas));
         toolBar.add(normalMapButton);
+
+        JButton twirlButton = new JButton(Filters.TWIRL.getPict());
+        twirlButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, twirlDialog,
+                    Filters.TWIRL.toString(), JOptionPane.OK_CANCEL_OPTION);
+            if (JOptionPane.OK_OPTION == confirm)
+                controller.makeTwirl(canvas, twirlDialog.getAngle());
+        });
+        toolBar.add(twirlButton);
 
         JButton embossingButton = new JButton(Filters.EMBOSSING.getPict());
         embossingButton.addActionListener(e -> controller.makeEmbossing(canvas));
