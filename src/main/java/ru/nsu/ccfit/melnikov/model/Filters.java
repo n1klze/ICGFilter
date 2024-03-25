@@ -11,6 +11,7 @@ public enum Filters {
     WATERCOLOR("Watercolor effect", "WE"),
     ZOOM("Zoom", "Z"),
     NORMAL_MAP("Normal mapping", "N"),
+    TWIRL("Twirl", "T"),
     EMBOSSING("Embossing", "E"),
     SHARPNESS("Sharpness", "S"),
     SOBEL("Sobel operator", "So"),

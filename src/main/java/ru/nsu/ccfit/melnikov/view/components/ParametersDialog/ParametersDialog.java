@@ -29,7 +29,6 @@ public class ParametersDialog extends JPanel {
         anglesChooser = new Chooser("Number of angles:", MIN_ANGLES, controller.getNumOfAngles(), MAX_ANGLES, STEP_SIZE);
         radiusChooser = new Chooser("Radius:", MIN_RADIUS, controller.getRadius(), MAX_RADIUS, STEP_SIZE);
         rotationChooser = new Chooser("Rotation angle:", MIN_ROTATION, controller.getRotation(), MAX_ROTATION, STEP_SIZE);
-
         interpolationTypeChooser = new InterpolationTypeChooser();
 
         add(thicknessChooser);
