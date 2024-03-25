@@ -170,8 +170,11 @@ public class Controller {
         BufferedImage newImage = Drafter.makeNormalMap(canvas.getImage());
         canvas.setImage(newImage);
     }
-    public void makeRotation(Canvas canvas){
-        int angle = 45;
+    public void makeTwirl(Canvas canvas, int angle) {
+        var newImage = Drafter.makeTwirl(canvas.getImage(), Math.toRadians(angle));
+        canvas.setImage(newImage);
+    }
+    public void makeRotation(Canvas canvas, int angle){
         canvas.setImage(Drafter.getRotated(canvas.getImage(), angle));
     }
     public void makeEmbossing(Canvas canvas){
