@@ -123,20 +123,35 @@ public class Controller {
             drawLine(image, vertex[i], vertex[(i + 1) % (2 * numOfAngles)]);
     }
   
-    public void ditherImageFloydAS(Canvas canvas){
-        BufferedImage newImage = Drafter.ditherImageFloydAS(canvas.getImage());
+    public void ditherImageFloydAS(Canvas canvas, int quantsR, int quantsG, int quantsB){
+        BufferedImage newImage = Drafter.ditherImageFloydAS(canvas.getImage(), quantsR, quantsG, quantsB);
         canvas.setImage(newImage);
     }
-    public void makeBlur(Canvas canvas){
-        double[][] mask = {{0.0947416, 0.118318, 0.0947416},
-                           {0.118318, 0.147761, 0.118318},
-                           {0.0947416, 0.118318 , 0.0947416}};
-        double[][] mask2 = {{1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0},
+    public void ditherImageOrderedAS(Canvas canvas, int quantsR, int quantsG, int quantsB){
+        int n = Math.max(Math.max(quantsR, quantsG), quantsB) * 2;
+        BufferedImage newImage = Drafter.ditherImageOrderedAS(canvas.getImage(), quantsR, quantsG, quantsB, n);
+        canvas.setImage(newImage);
+    }
+    public void makeBlur(Canvas canvas, int maskSize){
+        double[][] mask3 = {{0.0947416, 0.118318, 0.0947416},
+                            {0.118318, 0.147761, 0.118318},
+                            {0.0947416, 0.118318 , 0.0947416}};
+
+        double[][] mask5 = {{1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0},
                             {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
                             {6/256.0, 24/256.0, 36/256.0, 24/256.0, 6/256.0},
                             {4/256.0, 16/256.0, 24/256.0, 16/256.0, 4/256.0},
                             {1/256.0, 4/256.0, 6/256.0, 4/256.0, 1/256.0}};
-        BufferedImage newImage = Drafter.maskPixels(canvas.getImage(), mask2);
+        double[][] mask = new double[maskSize][maskSize];
+        if(maskSize == 3)
+            mask = mask3;
+        else if (maskSize == 5)
+            mask = mask5;
+        else
+            for(int y = 0; y < maskSize; y++)
+                for(int x = 0; x < maskSize; x++)
+                    mask[x][y] = 1.0 / (double)(maskSize * maskSize);
+        BufferedImage newImage = Drafter.maskPixels(canvas.getImage(), mask);
         canvas.setImage(newImage);
     }
     public void makeGrayShaded(Canvas canvas){
@@ -147,8 +162,8 @@ public class Controller {
         BufferedImage newImage = Drafter.makeWaterColored(canvas.getImage(), 2);
         canvas.setImage(newImage);
     }
-    public void makeZoom(Canvas canvas){
-        BufferedImage newImage = Drafter.makeZoom(canvas.getImage(), 2);
+    public void makeZoom(Canvas canvas, int times){
+        BufferedImage newImage = Drafter.makeZoom(canvas.getImage(), times);
         canvas.setImage(newImage);
     }
     public void makeNormalMap(Canvas canvas){

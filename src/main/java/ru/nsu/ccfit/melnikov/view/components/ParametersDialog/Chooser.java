@@ -20,6 +20,7 @@ public class Chooser extends JPanel {
         slider.setMajorTickSpacing(step);
         slider.setPaintTicks(true);
         slider.setValue(current);
+
         add(slider);
 
         var spinnerModel = new SpinnerNumberModel(current, minimum, maximum, step);

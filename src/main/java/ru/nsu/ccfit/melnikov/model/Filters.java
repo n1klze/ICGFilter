@@ -3,20 +3,20 @@ package ru.nsu.ccfit.melnikov.model;
 import lombok.Getter;
 
 public enum Filters {
-    ROTATION("Rotation", "R"),
-    FLOYD_STEINBERG_DITHERING("Floyd-Steinberg dithering", "FSD"),
-    ORDERED_DITHERING("Ordered dithering", "OD"),
-    BLUR("Blur", "B"),
-    GRAYSCALE("Grayscale", "GS"),
-    WATERCOLOR("Watercolor effect", "WE"),
-    ZOOM("Zoom", "Z"),
-    NORMAL_MAP("Normal mapping", "N"),
-    EMBOSSING("Embossing", "E"),
-    SHARPNESS("Sharpness", "S"),
-    SOBEL("Sobel operator", "So"),
-    ROBERTS("Roberts operator", "Ro"),
-    GAMMA("Gamma correction", "G"),
-    INVERSE("Inverse", "I");
+    ROTATION("Rotation", "/icon-rotate.png"),
+    FLOYD_STEINBERG_DITHERING("Floyd-Steinberg dithering", "/icon-floydsteinbergdithering.png"),
+    ORDERED_DITHERING("Ordered dithering", "/icon-orderlydithering.png"),
+    BLUR("Blur", "/icon-gausssmoothing.png"),
+    GRAYSCALE("Grayscale", "/icon-whiteandblack.png"),
+    WATERCOLOR("Watercolor effect", "/icon-aquarealization.png"),
+    ZOOM("Zoom", "/icon-changeviewmode.png"),
+    NORMAL_MAP("Normal mapping", "/icon-normalmap.png"),
+    EMBOSSING("Embossing", "/icon-embossing.png"),
+    SHARPNESS("Sharpness", "/icon-sharpnessincrease.png"),
+    SOBEL("Sobel operator", "/icon-sobeloperator.png"),
+    ROBERTS("Roberts operator", "/icon-robertsoperator.png"),
+    GAMMA("Gamma correction", "/icon-gammacorrection.png"),
+    INVERSE("Inverse", "/icon-negative.png");
 
     private final String name;
     @Getter

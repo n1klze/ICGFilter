@@ -3,8 +3,8 @@ package ru.nsu.ccfit.melnikov.view.components.buttons;
 import javax.swing.*;
 import java.awt.*;
 
-public class IconButton extends JButton {
-    public IconButton(String iconPath) {
+public class IconToggleButton extends JToggleButton {
+    public IconToggleButton(String iconPath) {
         super();
         var iconUrl = getClass().getResource(iconPath);
         if (iconUrl != null) {
@@ -14,7 +14,7 @@ public class IconButton extends JButton {
             setIcon(icon);
         }
 
-
         setFocusPainted(false);
     }
+
 }

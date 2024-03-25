@@ -3,10 +3,9 @@ package ru.nsu.ccfit.melnikov.view;
 import ru.nsu.ccfit.melnikov.controller.Controller;
 import ru.nsu.ccfit.melnikov.model.Filters;
 import ru.nsu.ccfit.melnikov.model.Tools;
-import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.ResizeDialog;
+import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.*;
 import ru.nsu.ccfit.melnikov.view.components.buttons.ColoredButton;
 import ru.nsu.ccfit.melnikov.view.components.buttons.IconButton;
-import ru.nsu.ccfit.melnikov.view.components.ParametersDialog.ParametersDialog;
 import ru.nsu.ccfit.melnikov.view.components.buttons.ToolButton;
 import ru.nsu.ccfit.melnikov.view.components.menu.AboutMenu;
 
@@ -25,6 +24,10 @@ public class MainFrame extends JFrame {
     private final Canvas canvas = new Canvas(controller, MINIMUM_SIZE, scrollPane);
     private final ParametersDialog parametersDialog = new ParametersDialog(controller);
     private final ResizeDialog resizeDialog = new ResizeDialog();
+    private final BlurDialog blurDialog = new BlurDialog();
+    private final ZoomDialog zoomDialog = new ZoomDialog();
+    private final DitheringDialog ditheringDialog = new DitheringDialog();
+    private final OrderedDitheringDialog orderedDitheringDialog = new OrderedDitheringDialog();
     private final Map<Tools, ToolButton> toolBarButtons = new HashMap<>();
     private final Map<Tools, JRadioButtonMenuItem> viewMenuToolButtons = new HashMap<>();
 
@@ -65,7 +68,7 @@ public class MainFrame extends JFrame {
             {
                 addActionListener(e -> {
                     int confirm = JOptionPane.showConfirmDialog(this, parametersDialog,
-                            "Options", JOptionPane.OK_CANCEL_OPTION);
+                            "Options", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
                     if (JOptionPane.OK_OPTION == confirm) {
                         controller.setThickness(parametersDialog.getThickness());
                         controller.setNumOfAngles(parametersDialog.getNumOfAngles());
@@ -151,7 +154,7 @@ public class MainFrame extends JFrame {
         var resize = new JMenuItem("Resize");
         resize.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, resizeDialog,
-                    "Resize", JOptionPane.OK_CANCEL_OPTION);
+                    "Resize", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.resizeCanvas(canvas, resizeDialog.getWidth(), resizeDialog.getHeight());
                 scrollPane.updateUI();
@@ -170,11 +173,28 @@ public class MainFrame extends JFrame {
         filters.add(rotation);
 
         var floydDithering = new JMenuItem(Filters.FLOYD_STEINBERG_DITHERING.toString());
-        floydDithering.addActionListener(e -> controller.ditherImageFloydAS(canvas));
+        floydDithering.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, ditheringDialog,
+                    "Dithering", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                if(ditheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
+                    controller.ditherImageFloydAS(canvas, ditheringDialog.getQuantsCountChooserR(),
+                            ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
+                else{
+
+                }
+            }
+        });
         filters.add(floydDithering);
 
         var blur = new JMenuItem(Filters.BLUR.toString());
-        blur.addActionListener(e -> controller.makeBlur(canvas));
+        blur.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, blurDialog,
+                    "Blur", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeBlur(canvas, blurDialog.getMaskSize());
+            }
+        });
         filters.add(blur);
 
         var grayscale = new JMenuItem(Filters.GRAYSCALE.toString());
@@ -186,7 +206,13 @@ public class MainFrame extends JFrame {
         filters.add(watercolor);
 
         var zoom = new JMenuItem(Filters.ZOOM.toString());
-        zoom.addActionListener(e -> controller.makeZoom(canvas));
+        zoom.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
+                    "Zoom", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeZoom(canvas, zoomDialog.getZoomSize());
+            }
+        });
         filters.add(zoom);
 
         var normalMap = new JMenuItem(Filters.NORMAL_MAP.toString());
@@ -285,66 +311,94 @@ public class MainFrame extends JFrame {
 
         toolBar.addSeparator();
 
-        JButton rotateButton = new JButton(Filters.ROTATION.getPict());
+        IconButton rotateButton = new IconButton(Filters.ROTATION.getPict());
         rotateButton.addActionListener(e -> controller.makeRotation(canvas));
         toolBar.add(rotateButton);
 
-        JButton ditherButtonAS = new JButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
-        ditherButtonAS.addActionListener(e -> controller.ditherImageFloydAS(canvas));
-        toolBar.add(ditherButtonAS);
+        IconButton ditherButtonAS = new IconButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
+        ditherButtonAS.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, ditheringDialog,
+                    "Floyd-Steinberg dithering", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                if(ditheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
+                    controller.ditherImageFloydAS(canvas, ditheringDialog.getQuantsCountChooserR(),
+                            ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
+                else{
 
-        JButton blurButton = new JButton(Filters.BLUR.getPict());
-        blurButton.addActionListener(e -> controller.makeBlur(canvas));
+                }
+            }
+        });
+        toolBar.add(ditherButtonAS);
+        IconButton orderedDitherButtonAS = new IconButton(Filters.ORDERED_DITHERING.getPict());
+        orderedDitherButtonAS.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, orderedDitheringDialog,
+                    "Ordered dithering", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                if(orderedDitheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
+                    controller.ditherImageOrderedAS(canvas, orderedDitheringDialog.getQuantsCountChooserR(),
+                            orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
+                else{
+
+                }
+            }
+        });
+        toolBar.add(orderedDitherButtonAS);
+
+        IconButton blurButton = new IconButton(Filters.BLUR.getPict());
+        blurButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, blurDialog,
+                    "Blur", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeBlur(canvas, blurDialog.getMaskSize());
+            }
+        });
         toolBar.add(blurButton);
 
-        JButton grayShadedButton = new JButton(Filters.GRAYSCALE.getPict());
+        IconButton grayShadedButton = new IconButton(Filters.GRAYSCALE.getPict());
         grayShadedButton.addActionListener(e -> controller.makeGrayShaded(canvas));
         toolBar.add(grayShadedButton);
 
-        JButton waterColoredButton = new JButton(Filters.WATERCOLOR.getPict());
+        IconButton waterColoredButton = new IconButton(Filters.WATERCOLOR.getPict());
         waterColoredButton.addActionListener(e -> controller.makeWaterColored(canvas));
         toolBar.add(waterColoredButton);
 
-        JButton zoomButton = new JButton(Filters.ZOOM.getPict());
-        zoomButton.addActionListener(e -> controller.makeZoom(canvas));
+        IconButton zoomButton = new IconButton(Filters.ZOOM.getPict());
+        zoomButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
+                    "Zoom", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeZoom(canvas, zoomDialog.getZoomSize());
+            }
+        });
         toolBar.add(zoomButton);
 
-        JButton normalMapButton = new JButton(Filters.NORMAL_MAP.getPict());
+        IconButton normalMapButton = new IconButton(Filters.NORMAL_MAP.getPict());
         normalMapButton.addActionListener(e -> controller.makeNormalMap(canvas));
         toolBar.add(normalMapButton);
 
-        JButton embossingButton = new JButton(Filters.EMBOSSING.getPict());
+        IconButton embossingButton = new IconButton(Filters.EMBOSSING.getPict());
         embossingButton.addActionListener(e -> controller.makeEmbossing(canvas));
         toolBar.add(embossingButton);
 
-        JButton sharpnessButton = new JButton(Filters.SHARPNESS.getPict());
+        IconButton sharpnessButton = new IconButton(Filters.SHARPNESS.getPict());
         sharpnessButton.addActionListener(e -> controller.makeSharpness(canvas));
         toolBar.add(sharpnessButton);
 
-        JButton sobelButton = new JButton(Filters.SOBEL.getPict());
+        IconButton sobelButton = new IconButton(Filters.SOBEL.getPict());
         sobelButton.addActionListener(e -> controller.makeSobel(canvas));
         toolBar.add(sobelButton);
 
-        JButton robertsButton = new JButton(Filters.ROBERTS.getPict());
+        IconButton robertsButton = new IconButton(Filters.ROBERTS.getPict());
         robertsButton.addActionListener(e -> controller.makeRoberts(canvas));
         toolBar.add(robertsButton);
 
-        JButton gammaButton = new JButton(Filters.GAMMA.getPict());
+        IconButton gammaButton = new IconButton(Filters.GAMMA.getPict());
         gammaButton.addActionListener(e -> controller.makeGamma(canvas));
         toolBar.add(gammaButton);
 
-        JButton inverseButton = new JButton(Filters.INVERSE.getPict());
+        IconButton inverseButton = new IconButton(Filters.INVERSE.getPict());
         inverseButton.addActionListener(e -> controller.makeInverse(canvas));
         toolBar.add(inverseButton);
-
-        toolBar.addSeparator();
-
-        var colorButtonGroup = new ButtonGroup();
-        for (var color : MAIN_PALETTE_COLORS) {
-            var coloredButton = new ColoredButton(controller, color);
-            toolBar.add(coloredButton);
-            colorButtonGroup.add(coloredButton);
-        }
 
         toolBar.addSeparator();
 
