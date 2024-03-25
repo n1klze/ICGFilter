@@ -136,6 +136,11 @@ public class Controller {
         BufferedImage newImage = Drafter.ditherImageOrderedAS(canvas.getImage(), quantsR, quantsG, quantsB, n);
         canvas.setImage(newImage);
     }
+    public void ditherImageOrderedNM(Canvas canvas, int quantsR, int quantsG, int quantsB) {
+        int n = Math.max(Math.max(quantsR, quantsG), quantsB) * 2;
+        BufferedImage newImage = Drafter.ditherImageOrderedNM(canvas.getImage(), quantsR, quantsG, quantsB, n);
+        canvas.setImage(newImage);
+    }
     public void makeBlur(Canvas canvas, int maskSize){
         double[][] mask3 = {{0.0947416, 0.118318, 0.0947416},
                             {0.118318, 0.147761, 0.118318},

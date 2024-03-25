@@ -291,11 +291,53 @@ public final class Drafter {
         return matrix;
     }
 
+    public static BufferedImage ditherImageOrderedNM(BufferedImage image, int redValue, int greenValue, int blueValue, int n) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        var newImage = new BufferedImage(width, height, image.getType());
+        newImage.createGraphics().drawImage(image, null, 0, 0);
+        var dr = 255.0 / (redValue - 1);
+        var dg = 255.0 / (greenValue - 1);
+        var db = 255.0 / (blueValue - 1);
+        var factor = 1.0 / Math.pow(n, 2);
+        int[] threshold = getErrors(n); //TODO: переделать
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                int oldPixel = newImage.getRGB(x, y);
+
+                double err = (threshold[(x % n) * n + y % n] * factor - 0.5);
+
+                int oldR = (oldPixel >> 16) & 0xFF;
+                int oldG = (oldPixel >> 8) & 0xFF;
+                int oldB = oldPixel & 0xFF;
+
+                int red = Math.max(0, Math.min(255, (int) Math.round(oldR + err * dr)));
+                int green = Math.max(0, Math.min(255, (int) Math.round(oldG + err * dg)));
+                int blue = Math.max(0, Math.min(255, (int) Math.round(oldB + err * db)));
+
+                int newR = Math.round(red * (redValue - 1) / 255f) * 255 / (redValue - 1);
+                int newG = Math.round(green * (greenValue - 1) / 255f) * 255 / (greenValue - 1);
+                int newB = Math.round(blue * (blueValue - 1) / 255f) * 255 / (blueValue - 1);
+
+                int newPixel = 255 << 24 | newR << 16 | newG << 8 | newB;
+                newImage.setRGB(x, y, newPixel);
+            }
+        }
+
+        return newImage;
+    }
+
+    private static int[] generateThresholdMatrix(int n) {
+        int[] matrix = new int[n * n];
+
+        return matrix;
+    }
 
     public static BufferedImage ditherImageFloydNM(BufferedImage image, int quantCountR, int quantCountG, int quantCountB) {
         int width = image.getWidth();
         int height = image.getHeight();
-        BufferedImage newImage = new BufferedImage(width, height, image.getType());
+        var newImage = new BufferedImage(width, height, image.getType());
         newImage.createGraphics().drawImage(image, null, 0, 0);
         int oldPixel, newPixel, neighbourPixel;
         int oldR, oldG, oldB;

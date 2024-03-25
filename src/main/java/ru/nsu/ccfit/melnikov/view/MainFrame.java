@@ -183,7 +183,7 @@ public class MainFrame extends JFrame {
         var floydDithering = new JMenuItem(Filters.FLOYD_STEINBERG_DITHERING.toString());
         floydDithering.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, ditheringDialog,
-                    "Dithering", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.FLOYD_STEINBERG_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 if(ditheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
                     controller.ditherImageFloydAS(canvas, ditheringDialog.getQuantsCountChooserR(),
@@ -196,10 +196,26 @@ public class MainFrame extends JFrame {
         });
         filters.add(floydDithering);
 
+        var orderedDithering = new JMenuItem(Filters.ORDERED_DITHERING.toString());
+        orderedDithering.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, orderedDitheringDialog,
+                    Filters.ORDERED_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                if(orderedDitheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
+                    controller.ditherImageOrderedAS(canvas, orderedDitheringDialog.getQuantsCountChooserR(),
+                            orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
+                else{
+                    controller.ditherImageOrderedNM(canvas, orderedDitheringDialog.getQuantsCountChooserR(),
+                            orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
+                }
+            }
+        });
+        filters.add(orderedDithering);
+
         var blur = new JMenuItem(Filters.BLUR.toString());
         blur.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, blurDialog,
-                    "Blur", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.BLUR.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeBlur(canvas, blurDialog.getMaskSize());
             }
@@ -217,7 +233,7 @@ public class MainFrame extends JFrame {
         var zoom = new JMenuItem(Filters.ZOOM.toString());
         zoom.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
-                    "Zoom", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.ZOOM.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeZoom(canvas, zoomDialog.getZoomSize());
             }
@@ -338,10 +354,10 @@ public class MainFrame extends JFrame {
         });
         toolBar.add(rotateButton);
 
-        IconButton ditherButtonAS = new IconButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
-        ditherButtonAS.addActionListener(e -> {
+        IconButton ditherButton = new IconButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
+        ditherButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, ditheringDialog,
-                    "Floyd-Steinberg dithering", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.FLOYD_STEINBERG_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 if(ditheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
                     controller.ditherImageFloydAS(canvas, ditheringDialog.getQuantsCountChooserR(),
@@ -352,26 +368,27 @@ public class MainFrame extends JFrame {
                 }
             }
         });
-        toolBar.add(ditherButtonAS);
-        IconButton orderedDitherButtonAS = new IconButton(Filters.ORDERED_DITHERING.getPict());
-        orderedDitherButtonAS.addActionListener(e -> {
+        toolBar.add(ditherButton);
+        IconButton orderedDitherButton = new IconButton(Filters.ORDERED_DITHERING.getPict());
+        orderedDitherButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, orderedDitheringDialog,
-                    "Ordered dithering", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.ORDERED_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 if(orderedDitheringDialog.getDitheringType() == DitheringDialog.Types.Silitskiy)
                     controller.ditherImageOrderedAS(canvas, orderedDitheringDialog.getQuantsCountChooserR(),
                             orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
                 else{
-
+                    controller.ditherImageOrderedNM(canvas, orderedDitheringDialog.getQuantsCountChooserR(),
+                            orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
                 }
             }
         });
-        toolBar.add(orderedDitherButtonAS);
+        toolBar.add(orderedDitherButton);
 
         IconButton blurButton = new IconButton(Filters.BLUR.getPict());
         blurButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, blurDialog,
-                    "Blur", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.BLUR.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeBlur(canvas, blurDialog.getMaskSize());
             }
@@ -389,7 +406,7 @@ public class MainFrame extends JFrame {
         IconButton zoomButton = new IconButton(Filters.ZOOM.getPict());
         zoomButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
-                    "Zoom", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    Filters.ZOOM.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeZoom(canvas, zoomDialog.getZoomSize());
             }
