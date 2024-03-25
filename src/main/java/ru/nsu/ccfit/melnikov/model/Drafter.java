@@ -482,7 +482,7 @@ public final class Drafter {
                 newImage.setRGB(x, y, newPixel);
             }
         }
-        return newImage;
+        return Drafter.makeSharpness(newImage);
     }
     public static BufferedImage makeZoom(BufferedImage image, int times){
         int width = image.getWidth();
