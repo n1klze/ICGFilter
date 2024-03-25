@@ -98,50 +98,46 @@ public final class Drafter {
             }
         }
     }
-    public static BufferedImage ditherImageFloydAS(BufferedImage image){
-        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-        int quantCountR = 2, quantCountG = 2, quantCountB = 2;
+    public static BufferedImage ditherImageFloydAS1(BufferedImage image, int quantCountR, int quantCountG, int quantCountB){
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         int quantIntervalR = 255 / (quantCountR - 1);
         int quantIntervalG = 255 / (quantCountG - 1);
         int quantIntervalB = 255 / (quantCountB - 1);
-        byte[] curRowMistakesR = new byte[image.getWidth()];
-        byte[] curRowMistakesG = new byte[image.getWidth()];
-        byte[] curRowMistakesB = new byte[image.getWidth()];
-        byte[] nextRowMistakesR = new byte[image.getWidth()];
-        byte[] nextRowMistakesG = new byte[image.getWidth()];
-        byte[] nextRowMistakesB = new byte[image.getWidth()];
-        /*for(int y = 0; y < image.getHeight(); y++){
-            for(int x = 0; x < image.getHeight(); x++){
-                image.setRGB(x, y, 0xff000000);
-            }
-        }
-        return image;*/
-        for(int y = 0; y < image.getHeight(); y++){
+        byte[] curRowMistakesR = new byte[width];
+        byte[] curRowMistakesG = new byte[width];
+        byte[] curRowMistakesB = new byte[width];
+        byte[] nextRowMistakesR = new byte[width];
+        byte[] nextRowMistakesG = new byte[width];
+        byte[] nextRowMistakesB = new byte[width];
+        for(int y = 0; y < height; y++){
             byte mistakeR = 0;
             byte mistakeG = 0;
             byte mistakeB = 0;
-            for(int x = 0; x < image.getWidth(); x++){
+            for(int x = 0; x < width; x++){
                 int oldPixel = image.getRGB(x, y);
                 int oldA = (oldPixel >> 24) & 0xff;
                 int oldR = (oldPixel >> 16) & 0xff;
                 int oldG = (oldPixel >> 8) & 0xff;
                 int oldB = (oldPixel) & 0xff;
-                int newR = Math.round(oldR / (float)quantIntervalR) * quantIntervalR;
-                int newG = Math.round(oldG / (float)quantIntervalG) * quantIntervalG;
-                int newB = Math.round(oldB / (float)quantIntervalB) * quantIntervalB;
+                int newR = Math.round(oldR / (float)quantIntervalR + mistakeR) * quantIntervalR;
+                int newG = Math.round(oldG / (float)quantIntervalG + mistakeG) * quantIntervalG;
+                int newB = Math.round(oldB / (float)quantIntervalB + mistakeB) * quantIntervalB;
+
                 /*if (oldR / quantIntervalR == quantCountR)
                     newR = newR - 1;]
                 if (oldG / quantIntervalG == quantCountG)
                     newG = newG - 1;
                 if (oldB / quantIntervalB == quantCountB)
                     newB = newB - 1;*/
-                int newPixel = (oldA << 24) & 0xFF000000 | (oldR << 16) & 0x00FF0000
-                             | (oldG << 8) & 0x0000FF00 | oldB & 0x000000FF;
+                int newPixel = (oldA << 24) & 0xFF000000 | (newR << 16) & 0x00FF0000
+                             | (newG << 8) & 0x0000FF00 | newB & 0x000000FF;
                 newImage.setRGB(x, y, newPixel);
                 mistakeR = (byte)(oldR - newR);
                 mistakeG = (byte)(oldG - newG);
                 mistakeB = (byte)(oldB - newB);
-                if(x != 0 && x != image.getWidth() - 1){
+                if(x != 0 && x != width - 1){
                     nextRowMistakesR[x - 1] = (byte)(mistakeR * 3 / 16);
                     nextRowMistakesG[x - 1] = (byte)(mistakeG * 3 / 16);
                     nextRowMistakesB[x - 1] = (byte)(mistakeB * 3 / 16);
@@ -158,7 +154,7 @@ public final class Drafter {
 
             }
 
-            for(int i = 0; i < image.getWidth(); i ++){
+            for(int i = 0; i < width; i ++){
                 curRowMistakesR[i] = nextRowMistakesR[i];
                 curRowMistakesG[i] = nextRowMistakesG[i];
                 curRowMistakesB[i] = nextRowMistakesB[i];
@@ -169,6 +165,133 @@ public final class Drafter {
         }
         return newImage;
     }
+
+    private static Color getNearestPaletteColor(Color color, int redValue, int greenValue, int blueValue) {
+
+        int red = 0, green = 0, blue = 0;
+
+        if (redValue > 1) {
+            red = ((int) Math.round(color.getRed() * (redValue - 1) / 255d)) * 255 / (redValue - 1);
+        }
+        if (greenValue > 1) {
+            green = ((int) Math.round(color.getGreen() * (greenValue - 1) / 255d)) * 255 / (greenValue - 1);
+        }
+        if (blueValue > 1) {
+            blue = ((int) Math.round(color.getBlue() * (blueValue - 1) / 255d)) * 255 / (blueValue - 1);
+        }
+
+        return new Color(red, green, blue);
+    }
+    public static BufferedImage ditherImageFloydAS(BufferedImage image, int quantCountR, int quantCountG, int quantCountB){
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage floyd = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+
+        int[] red = new int[width * height];
+        int[] green = new int[width * height];
+        int[] blue = new int[width * height];
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                Color color = new Color(pixels[y * width + x]);
+                red[y * width + x] = color.getRed();
+                green[y * width + x] = color.getGreen();
+                blue[y * width + x] = color.getBlue();
+            }
+        }
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                Color color = new Color(red[y * width + x], green[y * width + x], blue[y * width + x]);
+                Color nearest = getNearestPaletteColor(color, quantCountR, quantCountG, quantCountB);
+                floyd.setRGB(x, y, nearest.getRGB());
+
+                int redDiff = color.getRed() - nearest.getRed();
+                int greenDiff = color.getGreen() - nearest.getGreen();
+                int blueDiff = color.getBlue() - nearest.getBlue();
+
+                if (y + 1 < height) {
+                    red[(y + 1) * width + x] = Math.max(0, Math.min(255, red[(y + 1) * width + x] + (int) ((double) redDiff * (5f / 16f))));
+                    green[(y + 1) * width + x] = Math.max(0, Math.min(255, green[(y + 1) * width + x] + (int) ((double) greenDiff * (5f / 16f))));
+                    blue[(y + 1) * width + x] = Math.max(0, Math.min(255, blue[(y + 1) * width + x] + (int) ((double) blueDiff * (5f / 16f))));
+
+                    if (x + 1 < width) {
+                        red[(y + 1) * width + (x + 1)] = Math.max(0, Math.min(255, red[(y + 1) * width + (x + 1)] + (int) ((double) redDiff * (1f / 16f))));
+                        green[(y + 1) * width + (x + 1)] = Math.max(0, Math.min(255, green[(y + 1) * width + (x + 1)] + (int) ((double) greenDiff * (1f / 16f))));
+                        blue[(y + 1) * width + (x + 1)] = Math.max(0, Math.min(255, blue[(y + 1) * width + (x + 1)] + (int) ((double) blueDiff * (1f / 16f))));
+                    }
+
+                    if (x - 1 >= 0) {
+                        red[(y + 1) * width + (x - 1)] = Math.max(0, Math.min(255, red[(y + 1) * width + (x - 1)] + (int) ((double) redDiff * (3f / 16f))));
+                        green[(y + 1) * width + (x - 1)] = Math.max(0, Math.min(255, green[(y + 1) * width + (x - 1)] + (int) ((double) greenDiff * (3f / 16f))));
+                        blue[(y + 1) * width + (x - 1)] = Math.max(0, Math.min(255, blue[(y + 1) * width + (x - 1)] + (int) ((double) blueDiff * (3f / 16f))));
+                    }
+                }
+
+                if (x + 1 < width) {
+                    red[y * width + (x + 1)] = Math.max(0, Math.min(255, red[y * width + (x + 1)] + (int) ((double) redDiff * (7f / 16f))));
+                    green[y * width + (x + 1)] = Math.max(0, Math.min(255, green[y * width + (x + 1)] + (int) ((double) greenDiff * (7f / 16f))));
+                    blue[y * width + (x + 1)] = Math.max(0, Math.min(255, blue[y * width + (x + 1)] + (int) ((double) blueDiff * (7f / 16f))));
+                }
+            }
+        }
+        return floyd;
+    }
+    public static BufferedImage ditherImageOrderedAS(BufferedImage image, int redValue, int greenValue, int blueValue, int n) {
+        int width = image.getWidth();
+        int height = image.getHeight();
+        BufferedImage ordered = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        int[] pixels = image.getRGB(0, 0, width, height, null, 0, width);
+
+        int[] errorMatrix = getErrors(n);
+        double div = 1.0 / Math.pow(n, 2);
+        double half = 1.0 / 2.0;
+        double dr = 255.0 / (redValue - 1);
+        double dg = 255.0 / (greenValue - 1);
+        double db = 255.0 / (blueValue - 1);
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                Color color = new Color(pixels[y * width + x]);
+
+                double err = (errorMatrix[(x % n) * n + y % n] * div - half);
+
+                int red = Math.max(0, Math.min(255, (int) Math.round(color.getRed() + err * dr)));
+                int green = Math.max(0, Math.min(255, (int) Math.round(color.getGreen() + err * dg)));
+                int blue = Math.max(0, Math.min(255, (int) Math.round(color.getBlue() + err * db)));
+
+                Color newColor = getNearestPaletteColor(new Color(red, green, blue), redValue, greenValue, blueValue);
+                ordered.setRGB(x, y, newColor.getRGB());
+            }
+        }
+        return ordered;
+    }
+
+    private static int[] getErrors(int n) {
+
+        int[] matrix = new int[n * n];
+
+        if (n == 1) {
+            matrix[0] = 0;
+            return matrix;
+        }
+
+        int len = n / 2;
+        int[] smaller = getErrors(len);
+
+        for (int y = 0; y < 2; ++y) {
+            for (int k = 0; k < len; ++k) {
+                for (int l = 0; l < len; ++l) {
+                    matrix[k * len * 2 + (len * y + l)] = 4 * smaller[k * len + l] + 2 * y;
+                    matrix[((len + k) * len) * 2 + (len * y + l)] = 4 * smaller[k * len + l] + 3 - 2 * y;
+                }
+            }
+        }
+        return matrix;
+    }
+
+
     public static BufferedImage ditherImageFloydNM(BufferedImage image, int quantCountR, int quantCountG, int quantCountB) {
         BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         int oldPixel, currPixel, newPixel, neighbourPixel;
@@ -292,37 +415,6 @@ public final class Drafter {
             }
         }
         return newImage;
-    }
-
-    public static int maskPixel(BufferedImage image, int x, int y, double[][] mask){
-        int maskRadius = mask.length / 2;
-        int oldPixel = image.getRGB(x, y);
-        int oldA = (oldPixel >> 24) & 0xff;
-        double newR = 0, newG = 0, newB = 0;
-        for(int vertical = -maskRadius; vertical <= maskRadius; vertical++){
-            for(int horizontal = -maskRadius; horizontal <= maskRadius; horizontal++){
-                int currentX = x + horizontal;
-                int currentY = y + vertical;
-                if (currentX < 0 || currentY < 0 || currentX >= image.getWidth() || currentY >= image.getHeight())
-                    continue;
-                int currentPixel = image.getRGB(currentX, currentY);
-                int currentR = (currentPixel >> 16) & 0xff;
-                int currentG = (currentPixel >> 8) & 0xff;
-                int currentB = (currentPixel) & 0xff;
-                newR += (double)currentR * mask[horizontal + maskRadius][vertical + maskRadius];
-                newG += (double)currentG * mask[horizontal + maskRadius][vertical + maskRadius];
-                newB += (double)currentB * mask[horizontal + maskRadius][vertical + maskRadius];
-            }
-        }
-        newR = newR < 0 ? 0 : newR;
-        newG = newG < 0 ? 0 : newG;
-        newB = newB < 0 ? 0 : newB;
-        newR = newR > 255 ? 255 : newR;
-        newG = newG > 255 ? 255 : newG;
-        newB = newB > 255 ? 255 : newB;
-        int newPixel = (oldA << 24) & 0xFF000000 | ((char)newR << 16) & 0x00FF0000
-                | ((char)newG << 8) & 0x0000FF00 | ((char)newB) & 0x000000FF;
-        return newPixel;
     }
 
     public static BufferedImage makeGrayShaded(BufferedImage image){
@@ -467,7 +559,6 @@ public final class Drafter {
         }
     }
     public static BufferedImage getRotated(BufferedImage image, int degree){
-        System.out.println(degree);
         double angle = Math.toRadians(degree);
         double sin = Math.sin(angle);
         double cos = Math.cos(angle);
