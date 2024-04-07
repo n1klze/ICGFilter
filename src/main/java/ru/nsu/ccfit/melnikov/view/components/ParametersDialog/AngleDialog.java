@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class AngleDialog extends JPanel {
-    private static final int MIN_ANGLE = -360;
-    private static final int MAX_ANGLE = 360;
+    private static final int MIN_ANGLE = -180;
+    private static final int MAX_ANGLE = 180;
     private static final int STEP =  1;
     private final Chooser angleChooser;
 

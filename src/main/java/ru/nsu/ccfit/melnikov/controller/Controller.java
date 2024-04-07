@@ -23,7 +23,7 @@ import java.util.Map;
 @Setter
 public class Controller {
     private Color currentColor = Color.BLACK;
-    private Tools currentTool = Tools.PEN;
+    private Tools currentTool = Tools.CURSOR;
     private int currentInterpolationType = AffineTransformOp.TYPE_BILINEAR;
     private int thickness = 1;
     private int numOfAngles = 5;
@@ -132,12 +132,12 @@ public class Controller {
         canvas.setImage(newImage);
     }
     public void ditherImageOrderedAS(Canvas canvas, int quantsR, int quantsG, int quantsB){
-        int n = Math.max(Math.max(quantsR, quantsG), quantsB) * 2;
+        int n = Math.max(Math.max(quantsR, quantsG), quantsB) * 4;
         BufferedImage newImage = Drafter.ditherImageOrderedAS(canvas.getImage(), quantsR, quantsG, quantsB, n);
         canvas.setImage(newImage);
     }
     public void ditherImageOrderedNM(Canvas canvas, int quantsR, int quantsG, int quantsB) {
-        int n = Math.max(Math.max(quantsR, quantsG), quantsB) * 2;
+        int n = Math.max(Math.max(quantsR, quantsG), quantsB);
         BufferedImage newImage = Drafter.ditherImageOrderedNM(canvas.getImage(), quantsR, quantsG, quantsB, n);
         canvas.setImage(newImage);
     }
@@ -194,20 +194,20 @@ public class Controller {
         BufferedImage newImage = (Drafter.makeSharpness(canvas.getImage()));
         canvas.setImage(newImage);
     }
-    public void makeGamma(Canvas canvas){
-        BufferedImage newImage = (Drafter.makeGamma(canvas.getImage(),  0.5));
+    public void makeGamma(Canvas canvas, float gamma){
+        BufferedImage newImage = (Drafter.makeGamma(canvas.getImage(),  gamma));
         canvas.setImage(newImage);
     }
     public void makeInverse(Canvas canvas){
         BufferedImage newImage = (Drafter.makeInverse(canvas.getImage()));
         canvas.setImage(newImage);
     }
-    public void makeSobel(Canvas canvas){
-        BufferedImage newImage = (Drafter.makeSobel(canvas.getImage(), 70));
+    public void makeSobel(Canvas canvas, int threshold){
+        BufferedImage newImage = (Drafter.makeSobel(canvas.getImage(), threshold));
         canvas.setImage(newImage);
     }
-    public void makeRoberts(Canvas canvas){
-        BufferedImage newImage = (Drafter.makeRoberts(canvas.getImage(), 50));
+    public void makeRoberts(Canvas canvas, int threshold){
+        BufferedImage newImage = (Drafter.makeRoberts(canvas.getImage(), threshold));
         canvas.setImage(newImage);
     }
 }

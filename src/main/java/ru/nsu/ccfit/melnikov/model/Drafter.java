@@ -1,6 +1,8 @@
 package ru.nsu.ccfit.melnikov.model;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -750,6 +752,55 @@ public final class Drafter {
         return maskPixels(image, maskRezko);
     }
     public static BufferedImage makeSobel(BufferedImage image, int threshold){
+        double[][] maskShnobelH = {{1, 0, -1},
+                                   {2, 0, -2},
+                                   {1, 0, -1}};
+        double[][] maskShnobelV = {{-1, -2, -1},
+                                   {0, 0, 0},
+                                   {1, 2, 1}};
+        BufferedImage newImage = makeGrayShaded(image);
+        int height = newImage.getHeight();
+        int width = newImage.getWidth();
+        for(int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                double gxv = 0;
+                double gyv = 0;
+                for (int i = -1; i < 2; i++) {
+                    for (int j = -1; j < 2; j++) {
+                        int Y;
+                        if (j + x >= 0 && j + x < width && i + y >= 0 && i + y < height)
+                        {
+                            Y = newImage.getRGB(x + j, y + i) & 0x0000FF;
+                        }
+                        else
+                        {
+                            int nx = x + j, ny = y + i;
+                            if(nx < 0)
+                                nx = 0;
+                            else if (nx >= width)
+                                nx = width - 1;
+                            if(ny < 0)
+                                ny = 0;
+                            else if (ny >= height)
+                                ny = height - 1;
+                            Y = newImage.getRGB(nx, ny) & 0x0000FF;
+                        }
+
+                        gxv += Y * maskShnobelH[i + 1][j + 1];
+                        gyv += Y * maskShnobelV[i + 1][j + 1];
+                    }
+                }
+                double sqr = Math.sqrt(gxv*gxv + gyv*gyv);
+                if(sqr > threshold)
+                    newImage.setRGB(x, y, 0xFFFFFFFF);
+                else
+                    newImage.setRGB(x, y, 0xFF000000);
+
+            }
+        }
+        return newImage;
+    }
+    public static BufferedImage makeSobel1(BufferedImage image, int threshold){
         double[][] maskShnobelH = {{1, 0, -1},
                 {2, 0, -2},
                 {1, 0, -1}};

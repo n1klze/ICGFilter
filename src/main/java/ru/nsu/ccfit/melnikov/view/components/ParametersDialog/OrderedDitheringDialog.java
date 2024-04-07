@@ -14,7 +14,7 @@ public class OrderedDitheringDialog extends JPanel {
 
     private final JComboBox<DitheringDialog.Types> ditheringTypes;
 
-    public enum Types {
+    private enum Types {
         Silitskiy,
         Melnikov;
     }

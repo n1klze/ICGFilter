@@ -11,7 +11,7 @@ public enum Filters {
     WATERCOLOR("Watercolor effect", "/icon-aquarealization.png"),
     ZOOM("Zoom", "/icon-changeviewmode.png"),
     NORMAL_MAP("Normal mapping", "/icon-normalmap.png"),
-    TWIRL("Twirl", "T"),
+    TWIRL("Twirl", "/icon-twirl.png"),
     EMBOSSING("Embossing", "/icon-embossing.png"),
     SHARPNESS("Sharpness", "/icon-sharpnessincrease.png"),
     SOBEL("Sobel operator", "/icon-sobeloperator.png"),

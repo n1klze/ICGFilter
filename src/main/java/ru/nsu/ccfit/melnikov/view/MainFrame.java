@@ -27,6 +27,8 @@ public class MainFrame extends JFrame {
     private final ResizeDialog resizeDialog = new ResizeDialog();
     private final BlurDialog blurDialog = new BlurDialog();
     private final ZoomDialog zoomDialog = new ZoomDialog();
+    private final GammaDialog gammaDialog = new GammaDialog();
+    private final BorderDialog borderDialog = new BorderDialog();
     private final DitheringDialog ditheringDialog = new DitheringDialog();
     private final OrderedDitheringDialog orderedDitheringDialog = new OrderedDitheringDialog();
     private final AngleDialog rotationDialog = new AngleDialog();
@@ -37,7 +39,7 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         setTitle(TITLE);
         setMinimumSize(MINIMUM_SIZE);
-        setSize(660, 580);
+        setSize(670, 585);
         setResizable(true);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -107,6 +109,7 @@ public class MainFrame extends JFrame {
 
         var cursor = new JRadioButtonMenuItem(Tools.CURSOR.toString());
         cursor.addActionListener(e -> controller.setCurrentTool(Tools.CURSOR, toolBarButtons, viewMenuToolButtons));
+        cursor.setSelected(true);
         viewMenuToolButtons.put(Tools.CURSOR, cursor);
 
         var eraser = new JRadioButtonMenuItem(Tools.ERASER.toString());
@@ -117,7 +120,6 @@ public class MainFrame extends JFrame {
         viewMenuToolButtons.put(Tools.ERASER, eraser);
 
         var pen = new JRadioButtonMenuItem(Tools.PEN.toString());
-        pen.setSelected(true);
         pen.addActionListener(e -> controller.setCurrentTool(Tools.PEN, toolBarButtons, viewMenuToolButtons));
         viewMenuToolButtons.put(Tools.PEN, pen);
 
@@ -171,17 +173,34 @@ public class MainFrame extends JFrame {
     private JMenu createFiltersMenu() {
         var filters = new JMenu("Filters");
 
+        var zoom = new JMenuItem(Filters.ZOOM.toString());
+
+        zoom.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
+                    Filters.ZOOM.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeZoom(canvas, zoomDialog.getZoomSize());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
+
+        filters.add(zoom);
+
         var rotation = new JMenuItem(Filters.ROTATION.toString());
         rotation.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, rotationDialog,
                     Filters.ROTATION.toString(), JOptionPane.OK_CANCEL_OPTION);
             if (JOptionPane.OK_OPTION == confirm)
                 controller.makeRotation(canvas, rotationDialog.getAngle());
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         filters.add(rotation);
 
         var floydDithering = new JMenuItem(Filters.FLOYD_STEINBERG_DITHERING.toString());
         floydDithering.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, ditheringDialog,
                     Filters.FLOYD_STEINBERG_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
@@ -193,11 +212,13 @@ public class MainFrame extends JFrame {
                             ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
                 }
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         filters.add(floydDithering);
 
         var orderedDithering = new JMenuItem(Filters.ORDERED_DITHERING.toString());
         orderedDithering.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, orderedDitheringDialog,
                     Filters.ORDERED_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
@@ -209,16 +230,19 @@ public class MainFrame extends JFrame {
                             orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
                 }
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         filters.add(orderedDithering);
 
         var blur = new JMenuItem(Filters.BLUR.toString());
         blur.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, blurDialog,
                     Filters.BLUR.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeBlur(canvas, blurDialog.getMaskSize());
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         filters.add(blur);
 
@@ -227,50 +251,82 @@ public class MainFrame extends JFrame {
         filters.add(grayscale);
 
         var watercolor = new JMenuItem(Filters.WATERCOLOR.toString());
-        watercolor.addActionListener(e -> controller.makeWaterColored(canvas));
+        watercolor.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeWaterColored(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(watercolor);
 
-        var zoom = new JMenuItem(Filters.ZOOM.toString());
-        zoom.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
-                    Filters.ZOOM.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            if (JOptionPane.OK_OPTION == confirm) {
-                controller.makeZoom(canvas, zoomDialog.getZoomSize());
-            }
-        });
-        filters.add(zoom);
-
         var normalMap = new JMenuItem(Filters.NORMAL_MAP.toString());
-        normalMap.addActionListener(e -> controller.makeNormalMap(canvas));
+        normalMap.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeNormalMap(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(normalMap);
 
         var twirl = new JMenuItem(Filters.TWIRL.toString());
         twirl.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, twirlDialog,
                     Filters.TWIRL.toString(), JOptionPane.OK_CANCEL_OPTION);
             if (JOptionPane.OK_OPTION == confirm)
                 controller.makeTwirl(canvas, rotationDialog.getAngle());
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         filters.add(twirl);
 
         var embossing = new JMenuItem(Filters.EMBOSSING.toString());
-        embossing.addActionListener(e -> controller.makeEmbossing(canvas));
+        embossing.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeEmbossing(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(embossing);
 
         var sharpness = new JMenuItem(Filters.SHARPNESS.toString());
-        sharpness.addActionListener(e -> controller.makeSharpness(canvas));
+        sharpness.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeSharpness(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(sharpness);
 
         var sobel = new JMenuItem(Filters.SOBEL.toString());
-        sobel.addActionListener(e -> controller.makeSobel(canvas));
+        sobel.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, borderDialog,
+                    Filters.SOBEL.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeSobel(canvas, borderDialog.getThreshold());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(sobel);
 
         var roberts = new JMenuItem(Filters.ROBERTS.toString());
-        roberts.addActionListener(e -> controller.makeRoberts(canvas));
+        roberts.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, borderDialog,
+                    Filters.ROBERTS.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeRoberts(canvas, borderDialog.getThreshold());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(roberts);
 
         var gamma = new JMenuItem(Filters.GAMMA.toString());
-        gamma.addActionListener(e -> controller.makeGamma(canvas));
+        gamma.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, gammaDialog,
+                    Filters.GAMMA.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeGamma(canvas, gammaDialog.getGamma());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         filters.add(gamma);
 
         var inverse = new JMenuItem(Filters.INVERSE.toString());
@@ -290,11 +346,15 @@ public class MainFrame extends JFrame {
 
         var toolButtonGroup = new ButtonGroup();
 
-        var undo = new JButton("UNDO");
+        IconButton openFile = new IconButton("/icon-opefile.png");
+        openFile.addActionListener(e -> controller.loadImage(canvas));
+        toolBar.add(openFile);
+
+        IconButton undo = new IconButton("/icon-backarrow.png");
         undo.addActionListener(e -> canvas.undo());
         toolBar.add(undo);
 
-        var fit = new JButton("FIT");
+        IconButton fit = new IconButton("/icon-fitimage.png");
         fit.addActionListener(e -> canvas.fitToScreen());
         toolBar.add(fit);
 
@@ -303,6 +363,7 @@ public class MainFrame extends JFrame {
         var cursor = new ToolButton(controller, Tools.CURSOR, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.CURSOR, cursor);
         toolBar.add(cursor);
+        cursor.setSelected(true);
         toolButtonGroup.add(cursor);
 
         toolBar.addSeparator();
@@ -317,7 +378,6 @@ public class MainFrame extends JFrame {
 
         var pen = new ToolButton(controller, Tools.PEN, toolBarButtons, viewMenuToolButtons);
         toolBarButtons.put(Tools.PEN, pen);
-        pen.setSelected(true);
         toolBar.add(pen);
         toolButtonGroup.add(pen);
 
@@ -347,15 +407,18 @@ public class MainFrame extends JFrame {
 
         IconButton rotateButton = new IconButton(Filters.ROTATION.getPict());
         rotateButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, rotationDialog,
                     Filters.ROTATION.toString(), JOptionPane.OK_CANCEL_OPTION);
             if (JOptionPane.OK_OPTION == confirm)
                 controller.makeRotation(canvas, rotationDialog.getAngle());
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         toolBar.add(rotateButton);
 
         IconButton ditherButton = new IconButton(Filters.FLOYD_STEINBERG_DITHERING.getPict());
         ditherButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, ditheringDialog,
                     Filters.FLOYD_STEINBERG_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
@@ -367,10 +430,12 @@ public class MainFrame extends JFrame {
                             ditheringDialog.getQuantsCountChooserG(), ditheringDialog.getQuantsCountChooserB());
                 }
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         toolBar.add(ditherButton);
         IconButton orderedDitherButton = new IconButton(Filters.ORDERED_DITHERING.getPict());
         orderedDitherButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, orderedDitheringDialog,
                     Filters.ORDERED_DITHERING.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
@@ -382,16 +447,19 @@ public class MainFrame extends JFrame {
                             orderedDitheringDialog.getQuantsCountChooserG(), orderedDitheringDialog.getQuantsCountChooserB());
                 }
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         toolBar.add(orderedDitherButton);
 
         IconButton blurButton = new IconButton(Filters.BLUR.getPict());
         blurButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, blurDialog,
                     Filters.BLUR.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeBlur(canvas, blurDialog.getMaskSize());
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         toolBar.add(blurButton);
 
@@ -400,16 +468,22 @@ public class MainFrame extends JFrame {
         toolBar.add(grayShadedButton);
 
         IconButton waterColoredButton = new IconButton(Filters.WATERCOLOR.getPict());
-        waterColoredButton.addActionListener(e -> controller.makeWaterColored(canvas));
+        waterColoredButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeWaterColored(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         toolBar.add(waterColoredButton);
 
         IconButton zoomButton = new IconButton(Filters.ZOOM.getPict());
         zoomButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             int confirm = JOptionPane.showConfirmDialog(this, zoomDialog,
                     Filters.ZOOM.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
             if (JOptionPane.OK_OPTION == confirm) {
                 controller.makeZoom(canvas, zoomDialog.getZoomSize());
             }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         });
         toolBar.add(zoomButton);
 
@@ -417,7 +491,7 @@ public class MainFrame extends JFrame {
         normalMapButton.addActionListener(e -> controller.makeNormalMap(canvas));
         toolBar.add(normalMapButton);
       
-        JButton twirlButton = new JButton(Filters.TWIRL.getPict());
+        JButton twirlButton = new IconButton(Filters.TWIRL.getPict());
         twirlButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, twirlDialog,
                     Filters.TWIRL.toString(), JOptionPane.OK_CANCEL_OPTION);
@@ -427,23 +501,55 @@ public class MainFrame extends JFrame {
         toolBar.add(twirlButton);
       
         IconButton embossingButton = new IconButton(Filters.EMBOSSING.getPict());
-        embossingButton.addActionListener(e -> controller.makeEmbossing(canvas));
+        embossingButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeEmbossing(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         toolBar.add(embossingButton);
 
         IconButton sharpnessButton = new IconButton(Filters.SHARPNESS.getPict());
-        sharpnessButton.addActionListener(e -> controller.makeSharpness(canvas));
+        sharpnessButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            controller.makeSharpness(canvas);
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         toolBar.add(sharpnessButton);
 
         IconButton sobelButton = new IconButton(Filters.SOBEL.getPict());
-        sobelButton.addActionListener(e -> controller.makeSobel(canvas));
+        sobelButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, borderDialog,
+                    Filters.SOBEL.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeSobel(canvas, borderDialog.getThreshold());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         toolBar.add(sobelButton);
 
         IconButton robertsButton = new IconButton(Filters.ROBERTS.getPict());
-        robertsButton.addActionListener(e -> controller.makeRoberts(canvas));
+        robertsButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, borderDialog,
+                    Filters.ROBERTS.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeRoberts(canvas, borderDialog.getThreshold());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         toolBar.add(robertsButton);
 
         IconButton gammaButton = new IconButton(Filters.GAMMA.getPict());
-        gammaButton.addActionListener(e -> controller.makeGamma(canvas));
+        gammaButton.addActionListener(e -> {
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            int confirm = JOptionPane.showConfirmDialog(this, gammaDialog,
+                    Filters.GAMMA.toString(), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            if (JOptionPane.OK_OPTION == confirm) {
+                controller.makeGamma(canvas, gammaDialog.getGamma());
+            }
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        });
         toolBar.add(gammaButton);
 
         IconButton inverseButton = new IconButton(Filters.INVERSE.getPict());
