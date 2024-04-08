@@ -758,46 +758,54 @@ public final class Drafter {
         double[][] maskShnobelV = {{-1, -2, -1},
                                    {0, 0, 0},
                                    {1, 2, 1}};
-        BufferedImage newImage = makeGrayShaded(image);
-        int height = newImage.getHeight();
-        int width = newImage.getWidth();
-        for(int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                double gxv = 0;
-                double gyv = 0;
-                for (int i = -1; i < 2; i++) {
-                    for (int j = -1; j < 2; j++) {
-                        int Y;
-                        if (j + x >= 0 && j + x < width && i + y >= 0 && i + y < height)
-                        {
-                            Y = newImage.getRGB(x + j, y + i) & 0x0000FF;
-                        }
-                        else
-                        {
-                            int nx = x + j, ny = y + i;
-                            if(nx < 0)
-                                nx = 0;
-                            else if (nx >= width)
-                                nx = width - 1;
-                            if(ny < 0)
-                                ny = 0;
-                            else if (ny >= height)
-                                ny = height - 1;
-                            Y = newImage.getRGB(nx, ny) & 0x0000FF;
-                        }
 
-                        gxv += Y * maskShnobelH[i + 1][j + 1];
-                        gyv += Y * maskShnobelV[i + 1][j + 1];
+        BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+
+        for(int  x = 1; x < image.getWidth() - 1; x++)
+        {
+            for(int y = 1; y < image.getHeight() - 1; y++)
+            {
+                int gxRed = 0, gyRed = 0;
+                int gxGreen = 0, gyGreen = 0;
+                int gxBlue = 0, gyBlue = 0;
+
+                for(int i = -1; i <=1; i++)
+                {
+                    for(int j = -1; j <= 1; j++)
+                    {
+                        int curColor = image.getRGB(x + i, y + j);
+
+                        int red = (curColor >> 16) & 0xFF;
+                        int green = (curColor >> 8) & 0xFF;
+                        int blue = curColor & 0xFF;
+
+                        int grayRed = (int) (0.299 * red + 0.587 * 0 + 0.114 * 0);
+                        int grayGreen = (int) (0.299 * 0 + 0.587 * green + 0.114 * 0);
+                        int grayBlue = (int) (0.299 * 0 + 0.587 * 0 + 0.114 * blue);
+
+                        gxRed += maskShnobelV[i + 1][j + 1] * grayRed;
+                        gyRed += maskShnobelH[i + 1][j + 1] * grayRed;
+                        gxGreen += maskShnobelV[i + 1][j + 1] * grayGreen;
+                        gyGreen += maskShnobelH[i + 1][j + 1] * grayGreen;
+                        gxBlue += maskShnobelV[i + 1][j + 1] * grayBlue;
+                        gyBlue += maskShnobelH[i + 1][j + 1] * grayBlue;
                     }
                 }
-                double sqr = Math.sqrt(gxv*gxv + gyv*gyv);
-                if(sqr > threshold)
-                    newImage.setRGB(x, y, 0xFFFFFFFF);
-                else
-                    newImage.setRGB(x, y, 0xFF000000);
 
+                int magnitudeRed = (int) Math.sqrt(gxRed * gxRed + gyRed * gyRed);
+                int magnitudeGreen = (int) Math.sqrt(gxGreen * gxGreen + gyGreen * gyGreen);
+                int magnitudeBlue = (int) Math.sqrt(gxBlue * gxBlue + gyBlue * gyBlue);
+
+                int res;
+                if(magnitudeRed > threshold && magnitudeGreen > threshold && magnitudeBlue > threshold)
+                    res = new Color(255, 255, 255).getRGB();
+                else
+                    res = new Color(0, 0, 0).getRGB();
+
+                newImage.setRGB(x, y, res);
             }
         }
+
         return newImage;
     }
     public static BufferedImage makeSobel1(BufferedImage image, int threshold){
@@ -903,4 +911,6 @@ public final class Drafter {
         }
         return newImage;
     }
+
+
 }
